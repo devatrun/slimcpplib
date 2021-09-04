@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id:$
+// $Id: long_math.h 145 2021-09-04 11:21:08Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -87,6 +87,19 @@ inline constexpr bool is_signed_v = std::is_signed_v<type_t>;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// make_unsigned_t
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename type_t>
+struct make_unsigned {
+    using type = typename std::make_unsigned<type_t>::type;
+};
+template<typename type_t>
+using make_unsigned_t = typename make_unsigned<type_t>::type;
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // is_long_uint_v
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -96,6 +109,20 @@ template<typename type_t, uint_t size>
 inline constexpr bool is_long_uint_v<long_uint_t<type_t, size>> = true;
 template<typename type_t, uint_t size>
 inline constexpr bool is_long_uint_v<const long_uint_t<type_t, size>> = true;
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// is_long_int_v
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename>
+inline constexpr bool is_long_int_v = false;
+template<typename type_t, uint_t size>
+inline constexpr bool is_long_int_v<long_int_t<type_t, size>> = true;
+template<typename type_t, uint_t size>
+inline constexpr bool is_long_int_v<const long_int_t<type_t, size>> = true;
 
 
 
@@ -469,7 +496,7 @@ constexpr type_t mulc_classic(const type_t& value1, const type_t& value2, type_t
 
     bool add_carry = false;
     result_lo = addc(result_lo, carry, add_carry);
-    carry = addc(result_hi, type_t(), add_carry);
+    carry = addc(result_hi, type_t(0), add_carry);
 
     return result_lo;
 }
