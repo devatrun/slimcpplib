@@ -551,7 +551,12 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
     for (uint_t n = 0; n < std::size(digits); ++n)
         negative.digits[n] = ~digits[n];
 
-    return ++negative;
+    bool carry = true;
+
+    for (uint_t n = 0; n < std::size(negative.digits); ++n)
+        negative.digits[n] = addc<native_t>(negative.digits[n], 0, carry);
+
+    return negative;
 }
 
 
