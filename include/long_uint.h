@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id:$
+// $Id: long_uint.h 146 2021-09-04 11:56:58Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -75,6 +75,7 @@ public:
     constexpr long_uint_t(type_t value) noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
     constexpr long_uint_t(type_t value) noexcept;
+    constexpr long_uint_t(bool value) noexcept;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // public methods
@@ -193,6 +194,15 @@ constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
     }
     for (uint_t n = value_size; n < std::size(digits); ++n)
         digits[n] = extension;
+}
+
+template<typename native_t, uint_t size>
+constexpr long_uint_t<native_t, size>::long_uint_t(bool value) noexcept
+{
+    digits[0] = value;
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        digits[n] = native_t(0);
 }
 
 
@@ -760,8 +770,6 @@ constexpr long_uint_t<native_t, size> operator%(type_t value1, const long_uint_t
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept
 {
-    using long_uint_t = long_uint_t<type_t, 2>;
-
     type_t mul_hi = 0;
     const type_t mul_lo = mulc(value, multiplier, mul_hi);
 
