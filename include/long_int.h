@@ -68,6 +68,7 @@ public:
     constexpr long_int_t(type_t value) noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
     constexpr long_int_t(type_t value) noexcept;
+    constexpr long_int_t(bool value) noexcept;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // public methods
@@ -109,6 +110,17 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
 inline constexpr bool is_signed_v<long_int_t<native_t, size>> = true;
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// make_unsigned_t
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename native_t, uint_t size>
+struct make_unsigned<long_int_t<native_t, size>> {
+    using type = long_uint_t<native_t, size>;
+};
 
 
 
@@ -155,6 +167,12 @@ constexpr long_int_t<native_t, size>::long_int_t(type_t value) noexcept
 template<typename native_t, uint_t size>
 template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int>>
 constexpr long_int_t<native_t, size>::long_int_t(type_t value) noexcept
+: long_uint_t<native_t, size>(value)
+{
+}
+
+template<typename native_t, uint_t size>
+constexpr long_int_t<native_t, size>::long_int_t(bool value) noexcept
 : long_uint_t<native_t, size>(value)
 {
 }
@@ -484,7 +502,7 @@ constexpr long_int_t<native_t, size> operator/(type_t value1, const long_int_t<n
 template<typename type_t, std::enable_if_t<is_signed_v<type_t>, int>>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept
 {
-    using unsigned_t = std::make_unsigned_t<type_t>;
+    using unsigned_t = make_unsigned_t<type_t>;
     const unsigned_t uvalue = value >= 0 ? value : -value;
     const unsigned_t umultiplier = multiplier >= 0 ? multiplier : -multiplier;
     const unsigned_t udivider = divider >= 0 ? divider : -divider;
