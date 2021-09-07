@@ -28,7 +28,7 @@ where native_t may be one of base unsigned type and size must by power of two.
 
 [long_math_gcc.h](include/long_math_gcc.h) - GCC, CLANG helper classes and functions
 
-[long_math_gcc.h](include/long_math_msvc.h) - MSVC helper classes and functions
+[long_math_msvc.h](include/long_math_msvc.h) - MSVC helper classes and functions
 ## Integration
 The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in you project by include code below:
 ```c++
@@ -76,7 +76,7 @@ long_uint_t type supports following operators:
 long_int_t type supports following operators:
 `==, !=, <, <=, >, >=, <<=, <<, >>=, >>, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %`
 ## MulDiv
-The library implements the muldiv method for faster calculation of the following expressions: (a * b / b). It can be used with signed and unsigned integers.
+The library implements the muldiv method for faster calculation of the following expressions: (a * b / c). It can be used with signed and unsigned integers.
 ```c++
 template<typename type_t>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept;
