@@ -77,4 +77,4 @@ The library implements the muldiv method for faster calculation of the following
 template<typename type_t>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept;
 ```
-## Restrictions
+## Limitations
