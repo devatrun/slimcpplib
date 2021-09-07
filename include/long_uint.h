@@ -30,15 +30,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: long_uint.h 151 2021-09-07 11:33:21Z ykalmykov $
+// $Id: long_uint.h 152 2021-09-07 14:14:03Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
 #include "long_math.h"
-#include "long_math_msvc.h"
 #include "long_math_gcc.h"
+#include "long_math_msvc.h"
 
 #include <optional>
 
@@ -70,6 +70,8 @@ public:
     constexpr long_uint_t() noexcept = default;
     constexpr long_uint_t(const long_uint_t& that) noexcept = default;
     constexpr long_uint_t(long_uint_t&& that) noexcept = default;
+    template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
+    constexpr long_uint_t(const long_uint_t<native_t, other_size>& that) noexcept;
     constexpr long_uint_t(native_array_t digits) noexcept;
     template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int> = 0>
     constexpr long_uint_t(type_t value) noexcept;
@@ -84,6 +86,8 @@ public:
     constexpr long_uint_t& operator=(const long_uint_t& that) noexcept = default;
     constexpr long_uint_t& operator=(long_uint_t&& that) noexcept = default;
 
+    template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
+    explicit constexpr operator long_uint_t<native_t, other_size>() const noexcept;
     template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int> = 0>
     explicit constexpr operator type_t() const noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
@@ -154,6 +158,18 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 // construction/destruction
 
 template<typename native_t, uint_t size>
+template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
+constexpr long_uint_t<native_t, size>::long_uint_t(const long_uint_t<native_t, other_size>& that) noexcept
+{
+    constexpr uint_t value_size = std::min(size, other_size);
+
+    for (uint_t n = 0; n < value_size; ++n)
+        digits[n] = that.digits[n];
+    for (uint_t n = value_size; n < std::size(digits); ++n)
+        digits[n] = native_t(0);
+}
+
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>::long_uint_t(native_array_t digits) noexcept
 : digits(std::move(digits))
 {
@@ -185,7 +201,7 @@ constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
     for (uint_t n = 0; n < value_size; ++n) {
 
         digits[n] = value & native_t(~0);
-        value >>= std::min(bit_count_v<type_t> - 1,  bit_count_v<native_t>);
+        value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
     }
     for (uint_t n = value_size; n < std::size(digits); ++n)
         digits[n] = extension;
@@ -211,6 +227,21 @@ constexpr void long_uint_t<native_t, size>::swap(long_uint_t& that) noexcept
     using std::swap;
 
     swap(digits, that.digits);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
+constexpr long_uint_t<native_t, size>::operator long_uint_t<native_t, other_size>() const noexcept
+{
+    long_uint_t<native_t, other_size> tmp;
+
+    for (uint_t n = 0; n < other_size; ++n)
+        tmp.digits[n] = digits[n];
+
+    return tmp;
 }
 
 
@@ -615,7 +646,7 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator/=(c
 {
     std::optional<long_uint_t> remainder;
     *this = divr_helper<long_uint_t>::calc(*this, that, remainder);
-    
+
     return *this;
 }
 
@@ -636,7 +667,7 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator%=(c
 {
     long_uint_t dividend = *this;
     divr_helper<long_uint_t>::calc(dividend, that, *this);
-    
+
     return *this;
 }
 
@@ -785,7 +816,9 @@ namespace impl
 // enum parse_result
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class parse_result { ok, unexpected, overflow };
+enum class parse_result { ok,
+    unexpected,
+    overflow };
 constexpr uint8_t kSeparator = 0xff;
 
 
