@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: long_uint.h 146 2021-09-04 11:56:58Z ykalmykov $
+// $Id: long_uint.h 151 2021-09-07 11:33:21Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,7 +67,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // construction/destruction
 
-    constexpr long_uint_t() noexcept;
+    constexpr long_uint_t() noexcept = default;
     constexpr long_uint_t(const long_uint_t& that) noexcept = default;
     constexpr long_uint_t(long_uint_t&& that) noexcept = default;
     constexpr long_uint_t(native_array_t digits) noexcept;
@@ -152,11 +152,6 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // construction/destruction
-
-template<typename native_t, uint_t size>
-constexpr long_uint_t<native_t, size>::long_uint_t() noexcept
-{
-}
 
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>::long_uint_t(native_array_t digits) noexcept
@@ -311,7 +306,9 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() c
 {
     long_uint_t result;
 
-    for (uint_t n = 0; n < std::size(digits); ++n)
+    result.digits[0] = ~digits[0];
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
         result.digits[n] = ~digits[n];
 
     return result;
@@ -575,10 +572,12 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator*=(const long_uint_t& that) noexcept
 {
-    long_uint_t result;
-
     native_t carry = 0;
-    for (uint_t n = 0; n < std::size(digits); ++n)
+
+    long_uint_t result;
+    result.digits[0] = mulc(digits[0], that.digits[0], carry);
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
         result.digits[n] = mulc(digits[n], that.digits[0], carry);
 
     for (uint_t n = 1; n < std::size(digits); ++n) {
