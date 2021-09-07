@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id:$
+// $Id: long_int.h 151 2021-09-07 11:33:21Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +59,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // construction/destruction
 
-    constexpr long_int_t() noexcept;
+    constexpr long_int_t() noexcept = default;
     constexpr long_int_t(const long_int_t& that) noexcept = default;
     constexpr long_int_t(long_int_t&& that) noexcept = default;
     constexpr long_int_t(const long_uint_t<native_t, size>& that) noexcept;
@@ -139,11 +139,6 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // construction/destruction
-
-template<typename native_t, uint_t size>
-constexpr long_int_t<native_t, size>::long_int_t() noexcept
-{
-}
 
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>::long_int_t(const long_uint_t<native_t, size>& that) noexcept
