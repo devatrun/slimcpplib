@@ -30,7 +30,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: long_int.h 151 2021-09-07 11:33:21Z ykalmykov $
+// $Id: long_int.h 152 2021-09-07 14:14:03Z ykalmykov $
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +63,8 @@ public:
     constexpr long_int_t(const long_int_t& that) noexcept = default;
     constexpr long_int_t(long_int_t&& that) noexcept = default;
     constexpr long_int_t(const long_uint_t<native_t, size>& that) noexcept;
+    template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
+    constexpr long_int_t(const long_int_t<native_t, other_size>& that) noexcept;
     constexpr long_int_t(native_array_t digits) noexcept;
     template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int> = 0>
     constexpr long_int_t(type_t value) noexcept;
@@ -78,6 +80,8 @@ public:
     constexpr long_int_t& operator=(long_int_t&& that) noexcept = default;
 
     constexpr bool sign() const noexcept;
+    template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
+    explicit constexpr operator long_int_t<native_t, other_size>() const noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
     explicit constexpr operator type_t() const noexcept;
     constexpr bool operator==(const long_int_t& that) const noexcept;
@@ -147,6 +151,19 @@ constexpr long_int_t<native_t, size>::long_int_t(const long_uint_t<native_t, siz
 }
 
 template<typename native_t, uint_t size>
+template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
+constexpr long_int_t<native_t, size>::long_int_t(const long_int_t<native_t, other_size>& that) noexcept
+{
+    constexpr uint_t value_size = std::min(size, other_size);
+    const native_t extension = static_cast<native_t>(!that.sign() ? 0 : native_t(~0));
+
+    for (uint_t n = 0; n < value_size; ++n)
+        digits[n] = that.digits[n];
+    for (uint_t n = value_size; n < std::size(digits); ++n)
+        digits[n] = extension;
+}
+
+template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>::long_int_t(native_array_t digits) noexcept
 : long_uint_t<native_t, size>(std::move(digits))
 {
@@ -192,6 +209,21 @@ template<typename native_t, uint_t size>
 constexpr bool long_int_t<native_t, size>::sign() const noexcept
 {
     return std::make_signed_t<native_t>(digits[hi]) < 0;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
+constexpr long_int_t<native_t, size>::operator long_int_t<native_t, other_size>() const noexcept
+{
+    long_int_t<native_t, other_size> tmp;
+
+    for (uint_t n = 0; n < other_size; ++n)
+        tmp.digits[n] = digits[n];
+
+    return tmp;
 }
 
 
@@ -390,7 +422,7 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator/=(con
         result = -result;
 
     *this = result;
-   
+
     return *this;
 }
 
@@ -521,7 +553,8 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 using int128_t = long_int_t<uint64_t, 2>;
 using int256_t = long_int_t<uint64_t, 4>;
 
-namespace literals {
+namespace literals
+{
 
 template<char... chars>
 constexpr int128_t operator"" _si128() noexcept
