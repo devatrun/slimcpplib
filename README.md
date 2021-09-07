@@ -21,10 +21,14 @@ class long_int_t;  // signed integer
 where native_t may be one of base unsigned type and size must by power of two.
 ## Implementation
 [long_int.h](include/long_int.h) - long signed integer class
+
 [long_uint.h](include/long_uint.h) - long unsigned integer class
-[long_math.h](include/long_math.h) - crossplatform helper classes and functions 
-[long_math_gcc.h](include/long_math_gcc.h) - GCC, CLANG helper classes and functions 
-[long_math_gcc.h](include/long_math_msvc.h) - MSVC helper classes and functions 
+
+[long_math.h](include/long_math.h) - crossplatform helper classes and functions
+
+[long_math_gcc.h](include/long_math_gcc.h) - GCC, CLANG helper classes and functions
+
+[long_math_gcc.h](include/long_math_msvc.h) - MSVC helper classes and functions
 ## Integration
 The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in you project by include code below:
 ```c++
@@ -68,10 +72,11 @@ const uint128_t u = true;        // construction from boolean value
 ## Operators
 long_uint_t type supports following operators:
 ` ==, !=, <, <=, >, >=, <<=, <<, >>=, >>, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %, ~, &=, &, |=, |, ^=, ^`
+
 long_int_t type supports following operators:
 `==, !=, <, <=, >, >=, <<=, <<, >>=, >>, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %`
 ## MulDiv
-The library implements the muldiv method for faster calculation of the following expressions: (A * B / C). It can be used with signed and unsigned integers.
+The library implements the muldiv method for faster calculation of the following expressions: (a * b / b). It can be used with signed and unsigned integers.
 ```c++
 template<typename type_t>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept;
