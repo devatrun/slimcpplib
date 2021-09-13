@@ -1,6 +1,6 @@
 # SLIMCPP
-# Simple long integer math libtary for C++
-This library implements long integers that exceed maximum size of native type supported by a specific compiler by 2-4 times. In some cases, it is necessary to temporarily perform calculations with precision exceeding the maximum supported size of integers, and then return the result to its native size again. 
+# Simple long integer math library for C++
+SLIMCPP is C++ header-only library that implements long integers that exceed maximum size of native type supported by a specific compiler by 2-4 times. All classes, methods and functions were not created or designed to work with huge numbers, for which there are specialized mathematical libraries. In some cases, it is necessary to temporarily perform calculations with precision exceeding the maximum supported size of integers, and then return the result to its native size again. The conditions are ideal for SLIMCPP.
 The main features:
 * easy to use: the library is header-only
 * small: consists of few header files, there is no dependencies
@@ -28,9 +28,9 @@ where native_t may be one of base unsigned type and size must by power of two.
 ## Integration
 The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in you project by include code below:
 ```c++
-#include <slimcpplib/long_uint.h>
+#include <slimcpplib/long_int.h>  // Include all integers support
 // or
-#include <slimcpplib/long_int.h>
+#include <slimcpplib/long_uint.h> // Include only unsigned integers support
 
 namespace your_namespace
 {
@@ -70,7 +70,7 @@ const uint128_t u = true;        // construction from boolean value
 ` ==, !=, <, <=, >, >=, <<=, <<, >>=, >>, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %, ~, &=, &, |=, |, ^=, ^`
 
 * long_int_t type supports following operators:
-`==, !=, <, <=, >, >=, <<=, <<, >>=, >>, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %`
+`==, !=, <, <=, >, >=, +=, +, ++, -=, -, --, *=, *, /=, /, %=, %`
 ## MulDiv
 The library implements the muldiv method for faster calculation of the following expressions: (a * b / c). It can be used with signed and unsigned integers.
 ```c++
@@ -78,3 +78,5 @@ template<typename type_t>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept;
 ```
 ## Limitations
+* Although all methods and functions are defined using the constexpr qualifier, due to the limitations of C++ 17, working completely at compile time is only possible for code without instrinsics, since there is no implementation of [std::is_constant_evaluated()](https://en.cppreference.com/w/cpp/types/is_constant_evaluated) in the standard before C++ 20.
+* The design of long integers tries to completely repeat the behavior of native integers, but still differs. For example, the propagation of integer types always occurs from a signed integer to an unsigned integer, and an implicit conversion from a larger integer to a smaller integer does not cause a warning, but a compilation error.
