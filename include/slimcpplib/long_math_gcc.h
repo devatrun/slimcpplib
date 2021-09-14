@@ -34,7 +34,7 @@
 
 #include "long_math.h"
 
-#if __GNUC__
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 
 #include <x86intrin.h>
 
@@ -268,7 +268,7 @@ inline uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& c
 
 } // namespace slim
 
-#endif // __GNUC__
+#endif // defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // End of long_math_gcc.h

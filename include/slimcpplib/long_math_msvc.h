@@ -34,7 +34,7 @@
 
 #include "long_math.h"
 
-#if _MSC_VER
+#if defined(_MSC_VER)
 
 #include <intrin.h>
 
@@ -318,7 +318,7 @@ inline uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& c
 
 } // namespace slim
 
-#endif // _MSC_VER
+#endif // defined(_MSC_VER)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // End of long_math_msvc.h
