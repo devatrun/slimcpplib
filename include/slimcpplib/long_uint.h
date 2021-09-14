@@ -180,7 +180,7 @@ constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
 
     for (uint_t n = 0; n < value_size; ++n) {
 
-        digits[n] = value & native_t(~0);
+        digits[n] = value & ~native_t(0);
         value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
     }
     for (uint_t n = value_size; n < std::size(digits); ++n)
