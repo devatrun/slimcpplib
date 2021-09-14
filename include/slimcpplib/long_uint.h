@@ -33,8 +33,14 @@
 #pragma once
 
 #include "long_math.h"
+
+#if __has_include("long_math_gcc.h")
 #include "long_math_gcc.h"
+#endif // __has_include("long_math_gcc.h")
+
+#if __has_include("long_math_msvc.h")
 #include "long_math_msvc.h"
+#endif // __has_include("long_math_msvc.h")
 
 #include <optional>
 
