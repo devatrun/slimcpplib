@@ -26,7 +26,7 @@ where native_t may be one of base unsigned type and size must by power of two.
 * [long_math_gcc.h](include/slimcpplib/long_math_gcc.h) - GCC, CLANG helper classes and functions (Could be completely removed if irrelevant)
 * [long_math_msvc.h](include/slimcpplib/long_math_msvc.h) - MSVC helper classes and functions (Could be completely removed if irrelevant)
 ## Integration
-The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in you project by include code below:
+The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in your project by include code below:
 ```c++
 #include <slimcpplib/long_int.h>  // Include all integers support
 // or
@@ -58,12 +58,12 @@ constexpr auto u = 0xfedcba98'76543210'fedcba98'76543210_ui128;          // hexa
 ```
 ## Construction:
 ```c++
-const uint128_t u;               // construct uninitialized unsigned integer
-const uint128_t u = 1U;          // construction from unsigned integer
-const int128_t  s = -1;          // construction from signed integer
-const uint128_t u = 10000_ui128; // construction from long unsigned integer
-const int128_t  u = -10000_i128; // construction from long signed integer
-const uint128_t u = true;        // construction from boolean value
+const uint128_t u;                // construct uninitialized unsigned integer
+const uint128_t u = 1U;           // construction from unsigned integer
+const int128_t  s = -1;           // construction from signed integer
+const uint128_t u = 10000_ui128;  // construction from long unsigned integer
+const int128_t  u = -10000_si128; // construction from long signed integer
+const uint128_t u = true;         // construction from boolean value
 ```
 ## Operators
 * long_uint_t type supports following operators:
