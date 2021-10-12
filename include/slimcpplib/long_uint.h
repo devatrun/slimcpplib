@@ -336,14 +336,9 @@ constexpr bool long_uint_t<native_t, size>::operator>=(const long_uint_t& that) 
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() const noexcept
 {
-    long_uint_t result;
-
-    result.digits[0] = ~digits[0];
-
-    for (uint_t n = 1; n < std::size(digits); ++n)
-        result.digits[n] = ~digits[n];
-
-    return result;
+    return make_array(digits, [](uint_t /*idx*/, native_t value) {
+        return ~value;
+    });
 }
 
 
@@ -579,17 +574,11 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator--(in
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() const noexcept
 {
-    long_uint_t negative = *this;
-    
     bool borrow = true;
 
-    for (uint_t n = 0; n < std::size(negative.digits); ++n)
-        negative.digits[n] = subb<native_t>(negative.digits[n], 0, borrow);
-
-    for (uint_t n = 0; n < std::size(negative.digits); ++n)
-        negative.digits[n] = ~negative.digits[n];
-
-    return negative;
+    return make_array(digits, [&borrow](uint_t /*idx*/, native_t value) {
+        return ~subb<native_t>(value, 0, borrow);
+    });
 }
 
 

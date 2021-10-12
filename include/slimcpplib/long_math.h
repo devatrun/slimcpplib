@@ -119,6 +119,13 @@ using half_t = typename half_type<type_t>::type;
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// make array from specified array
+
+template<typename type_t, uint_t size, typename func_t>
+constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func);
+template<typename type_t, uint_t size, typename func_t, uint_t... idx>
+constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>);
+
 // extract low half of unsigned integer
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
@@ -183,6 +190,24 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+template<typename type_t, uint_t size, typename func_t>
+constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func)
+{
+    return make_array(arr, func, std::make_integer_sequence<uint_t, size>{});
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size, typename func_t, uint_t... idx>
+constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>)
+{
+    return std::array<type_t, size>{ (func(idx, arr[idx]))... };
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t half_lo(type_t value) noexcept
 {
