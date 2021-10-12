@@ -33,6 +33,7 @@
 #pragma once
 
 #include "long_math.h"
+#include "long_math_long.h"
 
 #if __has_include("long_math_gcc.h")
 #include "long_math_gcc.h"
@@ -41,8 +42,6 @@
 #if __has_include("long_math_msvc.h")
 #include "long_math_msvc.h"
 #endif // __has_include("long_math_msvc.h")
-
-#include <optional>
 
 namespace slim
 {
@@ -63,7 +62,7 @@ public:
     using native_array_t = std::array<native_t, size>;
 
     static_assert(is_unsigned_v<native_t>, "unsigned long integer native type must be unsigned.");
-    static_assert(size > 0, "native array size must be 1 or bigger.");
+    static_assert(size >= 2, "native array size must be 2 or bigger.");
     static_assert((size & (size - 1)) == 0, "native array size must be power of 2.");
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,7 +201,7 @@ constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
 
     for (uint_t n = 0; n < value_size; ++n) {
 
-        digits[n] = value & native_t(~0);
+        digits[n] = value & ~native_t(0);
         value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
     }
     for (uint_t n = value_size; n < std::size(digits); ++n)
@@ -492,10 +491,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator>>(ui
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator+=(const long_uint_t& that) noexcept
 {
-    bool carry = false;
-
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] = addc(digits[n], that.digits[n], carry);
+    add(digits, that.digits);
 
     return *this;
 }
@@ -539,10 +535,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator++(in
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator-=(const long_uint_t& that) noexcept
 {
-    bool borrow = false;
-
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] = subb(digits[n], that.digits[n], borrow);
+    sub(digits, that.digits);
 
     return *this;
 }
@@ -586,15 +579,15 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator--(in
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() const noexcept
 {
-    long_uint_t negative;
-
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        negative.digits[n] = ~digits[n];
-
-    bool carry = true;
+    long_uint_t negative = *this;
+    
+    bool borrow = true;
 
     for (uint_t n = 0; n < std::size(negative.digits); ++n)
-        negative.digits[n] = addc<native_t>(negative.digits[n], 0, carry);
+        negative.digits[n] = subb<native_t>(negative.digits[n], 0, borrow);
+
+    for (uint_t n = 0; n < std::size(negative.digits); ++n)
+        negative.digits[n] = ~negative.digits[n];
 
     return negative;
 }
@@ -605,28 +598,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator*=(const long_uint_t& that) noexcept
 {
-    native_t carry = 0;
-
-    long_uint_t result;
-    result.digits[0] = mulc(digits[0], that.digits[0], carry);
-
-    for (uint_t n = 1; n < std::size(digits); ++n)
-        result.digits[n] = mulc(digits[n], that.digits[0], carry);
-
-    for (uint_t n = 1; n < std::size(digits); ++n) {
-
-        long_uint_t tmp;
-        carry = 0;
-
-        for (uint_t k = 0; k < n; ++k)
-            tmp.digits[k] = 0;
-        for (uint_t k = 0; k < std::size(digits) - n; ++k)
-            tmp.digits[k + n] = mulc(digits[k], that.digits[n], carry);
-
-        result += tmp;
-    }
-
-    *this = result;
+    mul(digits, that.digits);
 
     return *this;
 }
@@ -647,7 +619,7 @@ template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator/=(const long_uint_t& that) noexcept
 {
     std::optional<long_uint_t> remainder;
-    *this = divr_helper<long_uint_t>::calc(*this, that, remainder);
+    *this = divr(*this, that, remainder);
 
     return *this;
 }
@@ -667,8 +639,10 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator/(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator%=(const long_uint_t& that) noexcept
 {
-    long_uint_t dividend = *this;
-    divr_helper<long_uint_t>::calc(dividend, that, *this);
+    std::optional<long_uint_t> remainder = long_uint_t();
+    divr(*this, that, remainder);
+
+    *this = *remainder;
 
     return *this;
 }
@@ -847,7 +821,7 @@ constexpr type_t mulc_costexpr(const type_t& value1, const type_t& value2, type_
 
     bool add_carry = false;
     result_lo = addc<type_t>(result_lo, carry, add_carry);
-    result_hi = addc<type_t>(result_hi, 0, add_carry);
+    result_hi += add_carry;
 
     carry = result_hi;
 

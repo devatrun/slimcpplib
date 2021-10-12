@@ -53,11 +53,6 @@ namespace slim
 using uint_t = uintptr_t;
 using int_t = intptr_t;
 
-template<typename type_t, uint_t size>
-class long_uint_t;
-template<typename type_t, uint_t size>
-class long_int_t;
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +76,18 @@ template<typename type_t>
 inline constexpr bool is_signed_v = std::is_signed_v<type_t>;
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// is_unsigned_array_v
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename type_t>
+inline constexpr bool is_unsigned_array_v = false;
+template<typename type_t, uint_t size>
+inline constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t> && true;
+template<typename type_t, uint_t size>
+inline constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t> && true;
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // make_unsigned_t
@@ -96,119 +103,15 @@ using make_unsigned_t = typename make_unsigned<type_t>::type;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// is_long_uint_v
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename>
-inline constexpr bool is_long_uint_v = false;
-template<typename type_t, uint_t size>
-inline constexpr bool is_long_uint_v<long_uint_t<type_t, size>> = true;
-template<typename type_t, uint_t size>
-inline constexpr bool is_long_uint_v<const long_uint_t<type_t, size>> = true;
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// is_long_int_v
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename>
-inline constexpr bool is_long_int_v = false;
-template<typename type_t, uint_t size>
-inline constexpr bool is_long_int_v<long_int_t<type_t, size>> = true;
-template<typename type_t, uint_t size>
-inline constexpr bool is_long_int_v<const long_int_t<type_t, size>> = true;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// half
+// half_t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-struct half {
-
+struct half_type {
     using type = type_t;
-
-    static constexpr type_t hi(const type_t& value) noexcept { return value >> (bit_count_v<type_t> / 2); }
-    static constexpr type_t lo(const type_t& value) noexcept { return value & (type_t(~type_t(0)) >> (bit_count_v<type_t> / 2)); }
-    static constexpr type_t make(const type_t& value_hi, const type_t& value_lo) noexcept { return (value_hi << (bit_count_v<type_t> / 2)) | value_lo; }
-};
-template<typename type_t, uint_t size>
-struct half<long_uint_t<type_t, size>> {
-
-    using type = long_uint_t<type_t, size / 2>;
-
-    static constexpr type hi(const long_uint_t<type_t, size>& value) noexcept
-    {
-        type result;
-
-        for (uint_t n = 0; n < size / 2; n++)
-            result.digits[n] = value.digits[n + size / 2];
-
-        return result;
-    }
-    static constexpr type lo(const long_uint_t<type_t, size>& value) noexcept
-    {
-        type result;
-
-        for (uint_t n = 0; n < size / 2; n++)
-            result.digits[n] = value.digits[n];
-
-        return result;
-    }
-    static constexpr long_uint_t<type_t, size> make(const type& value_hi, const type& value_lo) noexcept
-    {
-        long_uint_t<type_t, size> result;
-
-        for (uint_t n = 0; n < size / 2; n++)
-            result.digits[n] = value_lo.digits[n];
-        for (uint_t n = size / 2; n < size; n++)
-            result.digits[n] = value_hi.digits[n - size / 2];
-
-        return result;
-    }
 };
 template<typename type_t>
-struct half<long_uint_t<type_t, 1>> {
-
-    using type = type_t;
-
-    static constexpr type_t hi(const long_uint_t<type_t, 1>& value) noexcept { return half<type_t>::hi(value.digits[0]); }
-    static constexpr type_t lo(const long_uint_t<type_t, 1>& value) noexcept { return half<type_t>::lo(value.digits[0]); }
-    static constexpr long_uint_t<type_t, 1> make(const type_t& value_hi, const type_t& value_lo) noexcept { return half<type_t>::make(value_hi, value_lo); };
-};
-template<typename type_t>
-struct half<long_uint_t<type_t, 2>> {
-
-    using type = type_t;
-
-    static constexpr type_t hi(const long_uint_t<type_t, 2>& value) noexcept { return value.digits[1]; }
-    static constexpr type_t lo(const long_uint_t<type_t, 2>& value) noexcept { return value.digits[0]; }
-    static constexpr long_uint_t<type_t, 2> make(const type_t& value_hi, const type_t& value_lo) noexcept { return long_uint_t<type_t, 2>({ value_lo, value_hi }); };
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// divr_helper
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename type_t>
-struct divr_helper {
-    static constexpr type_t calc(const type_t& value1, const type_t& value2, std::optional<type_t>& remainder) noexcept { return divr(value1, value2, remainder); }
-};
-template<typename type_t, uint_t size>
-struct divr_helper<long_uint_t<type_t, size>> {
-    static constexpr long_uint_t<type_t, size> calc(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, std::optional<long_uint_t<type_t, size>>& remainder) noexcept { return divr(value1, value2, remainder); }
-};
-template<typename type_t>
-struct divr_helper<long_uint_t<type_t, 1>> {
-    static constexpr long_uint_t<type_t, 1> calc(const long_uint_t<type_t, 1>& value1, const long_uint_t<type_t, 1>& value2, std::optional<long_uint_t<type_t, 1>>& remainder) noexcept { 
-        return divr(value1.digits[0], value2.digits[0], remainder.digits[0]); 
-    }
-};
+using half_t = typename half_type<type_t>::type;
 
 
 
@@ -219,64 +122,60 @@ struct divr_helper<long_uint_t<type_t, 1>> {
 // extract low half of unsigned integer
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t half_lo(const type_t& value) noexcept;
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_lo(const long_uint_t<type_t, size>& value) noexcept;
+constexpr type_t half_lo(type_t value) noexcept;
 
 // extract high half of unsigned integer
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t half_hi(const type_t& value) noexcept;
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_hi(const long_uint_t<type_t, size>& value) noexcept;
+constexpr type_t half_hi(type_t value) noexcept;
 
 // move low half to high
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t half_make_hi(const type_t& value) noexcept;
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_make_hi(const long_uint_t<type_t, size>& value) noexcept;
+constexpr type_t half_make_hi(type_t value) noexcept;
 
 // calculate leading zero bits
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr uint_t nlz(const type_t& value) noexcept;
-template<typename type_t, uint_t size>
-constexpr uint_t nlz(const long_uint_t<type_t, size>& value) noexcept;
+constexpr uint_t nlz(type_t value) noexcept;
 
 // shift bits to left
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t shl2(const type_t& value_hi, const type_t& value_lo, uint_t shift) noexcept;
+constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // shift bits to right
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t shr2(const type_t& value_hi, const type_t& value_lo, uint_t shift) noexcept;
+constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // add with carry
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t addc(const type_t& value1, const type_t& value2, bool& carry) noexcept;
+constexpr type_t addc(type_t value1, type_t value2, bool& carry) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void add(type_t& value1, const type_t& value2) noexcept;
 
 // subtract with borrow
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t subb(const type_t& value1, const type_t& value2, bool& borrow) noexcept;
+constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void sub(type_t& value1, const type_t& value2) noexcept;
 
 // multiply with carry
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc(const type_t& value1, const type_t& value2, type_t& carry) noexcept;
+constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void mul(type_t& value1, const type_t& value2) noexcept;
 
 // divide with remainder
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t divr(const type_t& value1, const type_t& value2, std::optional<type_t>& remainder) noexcept;
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divr(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, std::optional<long_uint_t<type_t, size>>& remainder) noexcept;
+constexpr type_t divr(type_t value1, type_t value2, std::optional<type_t>& remainder) noexcept;
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t divr2(const type_t& value1_hi, const type_t& value1_lo, const type_t& value2, std::optional<type_t>& remainder) noexcept;
+constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::optional<type_t>& remainder) noexcept;
 
 
 
@@ -285,7 +184,7 @@ constexpr type_t divr2(const type_t& value1_hi, const type_t& value1_lo, const t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t half_lo(const type_t& value) noexcept
+constexpr type_t half_lo(type_t value) noexcept
 {
     return value & (type_t(~type_t(0)) >> (bit_count_v<type_t> / 2));
 }
@@ -293,27 +192,8 @@ constexpr type_t half_lo(const type_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_lo(const long_uint_t<type_t, size>& value) noexcept
-{
-    using long_uint_t = long_uint_t<type_t, size>;
-
-    constexpr uint_t half = size / 2;
-    long_uint_t result;
-
-    for (uint_t n = 0; n < half; n++)
-        result.digits[n] = value.digits[n];
-    for (uint_t n = half; n < size; n++)
-        result.digits[n] = 0;
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t half_hi(const type_t& value) noexcept
+constexpr type_t half_hi(type_t value) noexcept
 {
     return value >> (bit_count_v<type_t> / 2);
 }
@@ -321,27 +201,8 @@ constexpr type_t half_hi(const type_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_hi(const long_uint_t<type_t, size>& value) noexcept
-{
-    using long_uint_t = long_uint_t<type_t, size>;
-
-    constexpr uint_t half = size / 2;
-    long_uint_t result;
-
-    for (uint_t n = 0; n < half; n++)
-        result.digits[n] = value.digits[n + half];
-    for (uint_t n = half; n < size; n++)
-        result.digits[n] = 0;
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t half_make_hi(const type_t& value) noexcept
+constexpr type_t half_make_hi(type_t value) noexcept
 {
     return value << (bit_count_v<type_t> / 2);
 }
@@ -349,27 +210,8 @@ constexpr type_t half_make_hi(const type_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_make_hi(const long_uint_t<type_t, size>& value) noexcept
-{
-    using long_uint_t = long_uint_t<type_t, size>;
-
-    constexpr uint_t half = size / 2;
-    long_uint_t result;
-
-    for (uint_t n = 0; n < half; n++)
-        result.digits[n] = 0;
-    for (uint_t n = half; n < size; n++)
-        result.digits[n] = value.digits[n - half];
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr uint_t nlz(const type_t& value) noexcept
+constexpr uint_t nlz(type_t value) noexcept
 {
     uint_t result = 0;
     type_t mask = type_t(1) << (bit_count_v<type_t> - 1);
@@ -386,30 +228,8 @@ constexpr uint_t nlz(const type_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size>
-constexpr uint_t nlz(const long_uint_t<type_t, size>& value) noexcept
-{
-    using long_uint_t = long_uint_t<type_t, size>;
-
-    uint_t count = 0;
-
-    for (uint_t n = std::size(value.digits); n-- > 0;) {
-
-        const uint_t scount = nlz(value.digits[n]);
-        count += scount;
-
-        if (scount < bit_count_v<type_t>)
-            break;
-    }
-
-    return count;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t shl2(const type_t& value_hi, const type_t& value_lo, uint_t shift) noexcept
+constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     const type_t result_lo = value_lo;
     type_t result_hi = value_hi;
@@ -429,7 +249,7 @@ constexpr type_t shl2(const type_t& value_hi, const type_t& value_lo, uint_t shi
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t shr2(const type_t& value_hi, const type_t& value_lo, uint_t shift) noexcept
+constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     type_t result_lo = value_lo;
     const type_t result_hi = value_hi;
@@ -449,33 +269,68 @@ constexpr type_t shr2(const type_t& value_hi, const type_t& value_lo, uint_t shi
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t addc(const type_t& value1, const type_t& value2, bool& carry) noexcept
+constexpr type_t addc(type_t value1, const type_t value2, bool& carry) noexcept
 {
-    const type_t tmp = value2 + carry;
-    const type_t result = value1 + tmp;
-    carry = (tmp < value2) || (result < value1);
+    bool carry_new = false;
 
+    type_t result = value1;
+    result += value2;
+    carry_new = carry_new || (result < value2);
+    result += carry;
+    carry_new = carry_new || (result < type_t(carry));
+
+    carry = carry_new;
     return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void add(type_t& value1, const type_t& value2) noexcept
+{
+    bool carry = false;
+
+    for (uint_t n = 0; n < std::size(value1); ++n)
+        value1[n] = addc(value1[n], value2[n], carry);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t subb(const type_t& value1, const type_t& value2, bool& borrow) noexcept
+constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept
 {
-    const type_t tmp = value1 - borrow;
-    const type_t result = tmp - value2;
-    borrow = (tmp > value1) || (result > tmp);
+    bool borrow_new = false;
 
+    type_t result = value1;
+    result -= value2;
+    borrow_new = borrow_new || (result > value1);
+    type_t result_tmp = result;
+    result -= borrow;
+    borrow_new = borrow_new || (result > result_tmp);
+
+    borrow = borrow_new;
     return result;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void sub(type_t& value1, const type_t& value2) noexcept
+{
+    bool borrow = false;
+
+    for (uint_t n = 0; n < std::size(value1); ++n)
+        value1[n] = subb(value1[n], value2[n], borrow);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc_classic(const type_t& value1, const type_t& value2, type_t& carry) noexcept
+constexpr type_t mulc_classic(type_t value1, type_t value2, type_t& carry) noexcept
 {
     const type_t value1_lo = half_lo(value1);
     const type_t value1_hi = half_hi(value1);
@@ -487,21 +342,21 @@ constexpr type_t mulc_classic(const type_t& value1, const type_t& value2, type_t
     const type_t t2 = value1_lo * value2_hi + half_lo(t1);
     const type_t t3 = value1_hi * value2_hi + half_hi(t2);
 
-    type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
-    type_t result_hi = t3 + half_hi(t1);
+    const type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
+    const type_t result_hi = t3 + half_hi(t1);
 
     bool add_carry = false;
-    result_lo = addc(result_lo, carry, add_carry);
-    carry = addc(result_hi, type_t(0), add_carry);
+    const type_t result = addc(result_lo, carry, add_carry);
+    carry = result_hi + add_carry;
 
-    return result_lo;
+    return result;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc_karatsuba(const type_t& value1, const type_t& value2, type_t& carry) noexcept
+constexpr type_t mulc_karatsuba(type_t value1, type_t value2, type_t& carry) noexcept
 {
     const type_t value1_lo = half_lo(value1);
     const type_t value1_hi = half_hi(value1);
@@ -556,10 +411,10 @@ constexpr type_t mulc_karatsuba(const type_t& value1, const type_t& value2, type
 
     bool add_carry = false;
     result_lo = addc(result_lo, z_lo, add_carry);
-    result_hi = addc(result_hi, z_hi, add_carry);
+    result_hi += z_hi + add_carry;
     add_carry = false;
     result_lo = addc(result_lo, carry, add_carry);
-    carry = addc(result_hi, 0, add_carry);
+    carry = result_hi + add_carry;
 
     return result_lo;
 }
@@ -568,7 +423,7 @@ constexpr type_t mulc_karatsuba(const type_t& value1, const type_t& value2, type
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t mulc(const type_t& value1, const type_t& value2, type_t& carry) noexcept
+constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept
 {
     //return mulc_karatsuba(value1, value2, carry);
     return mulc_classic(value1, value2, carry);
@@ -577,8 +432,39 @@ constexpr type_t mulc(const type_t& value1, const type_t& value2, type_t& carry)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void mul(type_t& value1, const type_t& value2) noexcept
+{
+    using value_t = typename type_t::value_type;
+    value_t carry = 0;
+
+    type_t result;
+    result[0] = mulc(value1[0], value2[0], carry);
+
+    for (uint_t n = 1; n < std::size(value1); ++n)
+        result[n] = mulc(value1[n], value2[0], carry);
+
+    for (uint_t n = 1; n < std::size(value1); ++n) {
+
+        type_t tmp;
+        carry = 0;
+
+        for (uint_t k = 0; k < n; ++k)
+            tmp[k] = 0;
+        for (uint_t k = 0; k < std::size(value1) - n; ++k)
+            tmp[k + n] = mulc(value1[k], value2[n], carry);
+
+        add(result, tmp);
+    }
+
+    value1 = result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t divr(const type_t& value1, const type_t& value2, std::optional<type_t>& remainder) noexcept
+constexpr type_t divr(type_t value1, type_t value2, std::optional<type_t>& remainder) noexcept
 {
     type_t quotient = value1 / value2;
 
@@ -591,65 +477,15 @@ constexpr type_t divr(const type_t& value1, const type_t& value2, std::optional<
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divr(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, std::optional<long_uint_t<type_t, size>>& remainder) noexcept
-{
-    using long_uint_t = long_uint_t<type_t, size>;
-    using half_uint_t = typename half<long_uint_t>::type;
-
-    const half_uint_t dividend_lo = half<long_uint_t>::lo(value1);
-    const half_uint_t dividend_hi = half<long_uint_t>::hi(value1);
-    const half_uint_t divider_lo = half<long_uint_t>::lo(value2);
-    const half_uint_t divider_hi = half<long_uint_t>::hi(value2);
-
-    long_uint_t quotient;
-
-    if (divider_hi == 0) {
-
-        half_uint_t quotient_lo;
-        half_uint_t quotient_hi;
-        std::optional<half_uint_t> remainder_lo = remainder ? half_uint_t() : std::optional<half_uint_t>();
-
-        if (divider_lo > dividend_hi) {
-
-            if (dividend_hi == 0)
-                quotient_lo = divr<half_uint_t>(dividend_lo, divider_lo, remainder_lo);
-            else 
-                quotient_lo = divr2<half_uint_t>(dividend_hi, dividend_lo, divider_lo, remainder_lo);
-
-            quotient_hi = 0;
-
-        } else {
-
-            quotient_lo = divr2<half_uint_t>(dividend_hi % divider_lo, dividend_lo, divider_lo, remainder_lo);
-            quotient_hi = dividend_hi / divider_lo;
-        }
-
-        quotient = half<long_uint_t>::make(quotient_hi, quotient_lo);
-
-        if (remainder)
-            remainder = half<long_uint_t>::make(0, *remainder_lo);
-
-    } else {
-
-        quotient = divr2<long_uint_t>(0, value1, value2, remainder);
-    }
-
-    return quotient;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t divr2(const type_t& value1_hi, const type_t& value1_lo, const type_t& value2, std::optional<type_t>& remainder) noexcept
+constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::optional<type_t>& remainder) noexcept
 {
-    if (value1_hi >= value2) {
+    if (value2 != 0 && value1_hi >= value2) {
 
         if (remainder)
-            remainder = type_t(~0);
+            remainder = type_t(~type_t(0));
 
-        return type_t(~0);
+        return type_t(~type_t(0));
     }
 
     const uint_t shift = nlz(value2);

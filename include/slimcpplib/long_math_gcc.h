@@ -46,31 +46,31 @@ namespace slim
 
 // calculate leading zero bits
 
-uint_t nlz(const uint8_t& value) noexcept;
-uint_t nlz(const uint16_t& value) noexcept;
-uint_t nlz(const uint32_t& value) noexcept;
-uint_t nlz(const uint64_t& value) noexcept;
+uint_t nlz(uint8_t value) noexcept;
+uint_t nlz(uint16_t value) noexcept;
+uint_t nlz(uint32_t value) noexcept;
+uint_t nlz(uint64_t value) noexcept;
 
 // add with carry
 
-uint8_t addc(const uint8_t& value1, const uint8_t& value2, bool& carry) noexcept;
-uint16_t addc(const uint16_t& value1, const uint16_t& value2, bool& carry) noexcept;
-uint32_t addc(const uint32_t& value1, const uint32_t& value2, bool& carry) noexcept;
-uint64_t addc(const uint64_t& value1, const uint64_t& value2, bool& carry) noexcept;
+uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept;
+uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept;
+uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept;
+uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept;
 
 // subtract with borrow
 
-uint8_t subb(const uint8_t& value1, const uint8_t& value2, bool& borrow) noexcept;
-uint16_t subb(const uint16_t& value1, const uint16_t& value2, bool& borrow) noexcept;
-uint32_t subb(const uint32_t& value1, const uint32_t& value2, bool& borrow) noexcept;
-uint64_t subb(const uint64_t& value1, const uint64_t& value2, bool& borrow) noexcept;
+uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept;
+uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept;
+uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept;
+uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept;
 
 // multiply with carry
 
-uint8_t mulc(const uint8_t& value1, const uint8_t& value2, uint8_t& carry) noexcept;
-uint16_t mulc(const uint16_t& value1, const uint16_t& value2, uint16_t& carry) noexcept;
-uint32_t mulc(const uint32_t& value1, const uint32_t& value2, uint32_t& carry) noexcept;
-uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& carry) noexcept;
+uint8_t mulc(uint8_t value1, uint8_t value2, uint8_t& carry) noexcept;
+uint16_t mulc(uint16_t value1, uint16_t value2, uint16_t& carry) noexcept;
+uint32_t mulc(uint32_t value1, uint32_t value2, uint32_t& carry) noexcept;
+uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept;
 
 
 
@@ -78,7 +78,7 @@ uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& carry) n
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline uint_t nlz(const uint8_t& value) noexcept
+inline uint_t nlz(uint8_t value) noexcept
 {
     return value ? __builtin_clz(value) : bit_count_v<uint8_t>;
 }
@@ -86,7 +86,7 @@ inline uint_t nlz(const uint8_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint_t nlz(const uint16_t& value) noexcept
+inline uint_t nlz(uint16_t value) noexcept
 {
     return value ? __builtin_clz(value) : bit_count_v<uint16_t>;
 }
@@ -94,7 +94,7 @@ inline uint_t nlz(const uint16_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint_t nlz(const uint32_t& value) noexcept
+inline uint_t nlz(uint32_t value) noexcept
 {
     return value ? __builtin_clz(value) : bit_count_v<uint32_t>;
 }
@@ -102,7 +102,7 @@ inline uint_t nlz(const uint32_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint_t nlz(const uint64_t& value) noexcept
+inline uint_t nlz(uint64_t value) noexcept
 {
 #ifdef __x86_64__
     return value ? __builtin_clz(value) : bit_count_v<uint64_t>;
@@ -118,7 +118,7 @@ inline uint_t nlz(const uint64_t& value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t addc(const uint8_t& value1, const uint8_t& value2, bool& carry) noexcept
+inline uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept
 {
     uint8_t result;
     carry = __builtin_add_overflow(value1, value2, &result);
@@ -129,7 +129,7 @@ inline uint8_t addc(const uint8_t& value1, const uint8_t& value2, bool& carry) n
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t addc(const uint16_t& value1, const uint16_t& value2, bool& carry) noexcept
+inline uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept
 {
     uint16_t result;
     carry = __builtin_add_overflow(value1, value2, &result);
@@ -140,7 +140,7 @@ inline uint16_t addc(const uint16_t& value1, const uint16_t& value2, bool& carry
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t addc(const uint32_t& value1, const uint32_t& value2, bool& carry) noexcept
+inline uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept
 {
     uint32_t result;
     carry = __builtin_add_overflow(value1, value2, &result);
@@ -151,7 +151,7 @@ inline uint32_t addc(const uint32_t& value1, const uint32_t& value2, bool& carry
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t addc(const uint64_t& value1, const uint64_t& value2, bool& carry) noexcept
+inline uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept
 {
 #ifdef __x86_64__
     uint64_t result;
@@ -165,8 +165,29 @@ inline uint64_t addc(const uint64_t& value1, const uint64_t& value2, bool& carry
 
 
 
+#if !defined(_M_X64) && defined(__SSE4_2__)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t subb(const uint8_t& value1, const uint8_t& value2, bool& borrow) noexcept
+template<typename type_t, uint_t size, std::enable_if_t<bit_count_v<type_t> * size == 128, int> = 0>
+inline void add(std::array<type_t, size>& value1, const std::array<type_t, size>& value2) noexcept
+{
+    __m128i v1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(value1.data()));
+    const __m128i v2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(value2.data()));
+
+    __m128i result = _mm_add_epi64(v1, v2);
+    const __m128i sign_mask = _mm_set1_epi64x(0x8000000000000000);
+    const __m128i v1_flip = _mm_xor_si128(v1, sign_mask);
+    const __m128i result_flip = _mm_xor_si128(result, sign_mask);
+    const __m128i cmp = _mm_unpacklo_epi64(_mm_setzero_si128(), _mm_cmpgt_epi64(v1_flip, result_flip));
+    result = _mm_sub_epi64(result, cmp);
+
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(value1.data()), result);
+}
+#endif // !defined(_M_X64) && defined(__SSE4_2__)
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept
 {
     uint8_t result;
     borrow = __builtin_sub_overflow(value1, value2, &result);
@@ -177,7 +198,7 @@ inline uint8_t subb(const uint8_t& value1, const uint8_t& value2, bool& borrow) 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t subb(const uint16_t& value1, const uint16_t& value2, bool& borrow) noexcept
+inline uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept
 {
     uint16_t result;
     borrow = __builtin_sub_overflow(value1, value2, &result);
@@ -188,7 +209,7 @@ inline uint16_t subb(const uint16_t& value1, const uint16_t& value2, bool& borro
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t subb(const uint32_t& value1, const uint32_t& value2, bool& borrow) noexcept
+inline uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept
 {
     uint32_t result;
     borrow = __builtin_sub_overflow(value1, value2, &result);
@@ -199,7 +220,7 @@ inline uint32_t subb(const uint32_t& value1, const uint32_t& value2, bool& borro
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t subb(const uint64_t& value1, const uint64_t& value2, bool& borrow) noexcept
+inline uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept
 {
 #ifdef __x86_64__
     uint64_t result;
@@ -213,8 +234,29 @@ inline uint64_t subb(const uint64_t& value1, const uint64_t& value2, bool& borro
 
 
 
+#if !defined(_M_X64) && defined(__SSE4_2__)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t mulc(const uint8_t& value1, const uint8_t& value2, uint8_t& carry) noexcept
+template<typename type_t, uint_t size, std::enable_if_t<bit_count_v<type_t> * size == 128, int> = 0>
+inline void sub(std::array<type_t, size>& value1, const std::array<type_t, size>& value2) noexcept
+{
+    __m128i v1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(value1.data()));
+    const __m128i v2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(value2.data()));
+
+    __m128i result = _mm_sub_epi64(v1, v2);
+    const __m128i sign_mask = _mm_set1_epi64x(0x8000000000000000);
+    const __m128i v1_flip = _mm_xor_si128(v1, sign_mask);
+    const __m128i result_flip = _mm_xor_si128(result, sign_mask);
+    const __m128i cmp = _mm_unpacklo_epi64(_mm_setzero_si128(), _mm_cmpgt_epi64(result_flip, v1_flip));
+    result = _mm_add_epi64(result, cmp);
+
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(value1.data()), result);
+}
+#endif // !defined(_M_X64) && defined(__SSE4_2__)
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint8_t mulc(uint8_t value1, uint8_t value2, uint8_t& carry) noexcept
 {
     const uint16_t result = uint16_t(value1) * uint16_t(value2) + uint16_t(carry);
     carry = static_cast<uint8_t>(half_hi(result));
@@ -225,7 +267,7 @@ inline uint8_t mulc(const uint8_t& value1, const uint8_t& value2, uint8_t& carry
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t mulc(const uint16_t& value1, const uint16_t& value2, uint16_t& carry) noexcept
+inline uint16_t mulc(uint16_t value1, uint16_t value2, uint16_t& carry) noexcept
 {
     const uint32_t result = uint32_t(value1) * uint32_t(value2) + uint32_t(carry);
     carry = static_cast<uint16_t>(half_hi(result));
@@ -236,7 +278,7 @@ inline uint16_t mulc(const uint16_t& value1, const uint16_t& value2, uint16_t& c
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t mulc(const uint32_t& value1, const uint32_t& value2, uint32_t& carry) noexcept
+inline uint32_t mulc(uint32_t value1, uint32_t value2, uint32_t& carry) noexcept
 {
     const uint64_t result = uint64_t(value1) * uint64_t(value2) + uint64_t(carry);
     carry = static_cast<uint32_t>(half_hi(result));
@@ -247,7 +289,7 @@ inline uint32_t mulc(const uint32_t& value1, const uint32_t& value2, uint32_t& c
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& carry) noexcept
+inline uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept
 {
 #ifdef __x86_64__
     const unsigned __int128 result = static_cast<unsigned __int128>(value1) * value2;
@@ -256,7 +298,7 @@ inline uint64_t mulc(const uint64_t& value1, const uint64_t& value2, uint64_t& c
 
     bool add_carry = false;
     result_lo = addc(result_lo, carry, add_carry);
-    result_hi = addc(result_hi, 0, add_carry);
+    result_hi += add_carry;
 
     carry = result_hi;
 
