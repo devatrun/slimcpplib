@@ -53,15 +53,11 @@ uint_t nlz(uint64_t value) noexcept;
 
 // add with carry
 
-uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept;
-uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept;
 uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept;
 uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept;
 
 // subtract with borrow
 
-uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept;
-uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept;
 uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept;
 uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept;
 
@@ -118,32 +114,10 @@ inline uint_t nlz(uint64_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept
-{
-    uint8_t result;
-    carry = __builtin_add_overflow(value1, value2, &result);
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept
-{
-    uint16_t result;
-    carry = __builtin_add_overflow(value1, value2, &result);
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept
 {
     uint32_t result;
-    carry = __builtin_add_overflow(value1, value2, &result);
+    carry = __builtin_ia32_addcarryx_u32(static_cast<uint8_t>(carry), value1, value2, &result);
 
     return result;
 }
@@ -154,8 +128,8 @@ inline uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept
 inline uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept
 {
 #ifdef __x86_64__
-    uint64_t result;
-    carry = __builtin_add_overflow(value1, value2, &result);
+    unsigned long long result;
+    carry = __builtin_ia32_addcarryx_u64(static_cast<uint8_t>(carry), value1, value2, &result);
 
     return result;
 #else
@@ -187,33 +161,14 @@ inline void add(std::array<type_t, size>& value1, const std::array<type_t, size>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept
-{
-    uint8_t result;
-    borrow = __builtin_sub_overflow(value1, value2, &result);
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept
-{
-    uint16_t result;
-    borrow = __builtin_sub_overflow(value1, value2, &result);
-
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept
 {
     uint32_t result;
-    borrow = __builtin_sub_overflow(value1, value2, &result);
-
+#ifdef __clang__
+    borrow = __builtin_ia32_subborrow_u32(static_cast<uint8_t>(borrow), value1, value2, &result);
+#else
+    borrow = __builtin_ia32_sbb_u32(static_cast<uint8_t>(borrow), value1, value2, &result);
+#endif // __CLANG__
     return result;
 }
 
@@ -223,9 +178,12 @@ inline uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept
 inline uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept
 {
 #ifdef __x86_64__
-    uint64_t result;
-    borrow = __builtin_sub_overflow(value1, value2, &result);
-
+    unsigned long long result;
+#ifdef __clang__
+    borrow = __builtin_ia32_subborrow_u64(static_cast<uint8_t>(borrow), value1, value2, &result);
+#else
+    borrow = __builtin_ia32_sbb_u64(static_cast<uint8_t>(borrow), value1, value2, &result);
+#endif // __CLANG__
     return result;
 #else
     return subb<uint64_t>(value1, value2, borrow);
