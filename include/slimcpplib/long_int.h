@@ -217,12 +217,7 @@ template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_int_t<native_t, size>::operator long_int_t<native_t, other_size>() const noexcept
 {
-    long_int_t<native_t, other_size> tmp;
-
-    for (uint_t n = 0; n < other_size; ++n)
-        tmp.digits[n] = digits[n];
-
-    return tmp;
+    return make_array<other_size>(digits, [](const auto& digits, uint_t idx) { return digits[idx]; });
 }
 
 
