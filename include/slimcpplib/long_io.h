@@ -84,7 +84,7 @@ inline std::basic_ostream<char_t, traits_t>& operator<<(std::basic_ostream<char_
         base = 16;
 
     constexpr uint_t max_digits = (bit_count_v<long_uint_t> + 2) / 3;
-    const uint_t digit_count = static_cast<uint_t>(std::ceil((bit_count_v<long_uint_t> - nlz(value)) * std::log10(2) / std::log10(base)));
+    const uint_t digit_count = std::max<uint_t>(1, static_cast<uint_t>(std::ceil((bit_count_v<long_uint_t> - nlz(value)) * std::log10(2) / std::log10(base))));
     const bool uppercase = (stream.flags() & std::ios::uppercase) != 0;
     std::array<char_t, max_digits> output;
 
