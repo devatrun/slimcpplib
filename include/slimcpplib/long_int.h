@@ -254,7 +254,7 @@ constexpr bool long_int_t<native_t, size>::operator!=(const long_int_t& that) co
 template<typename native_t, uint_t size>
 constexpr bool long_int_t<native_t, size>::operator<(const long_int_t& that) const noexcept
 {
-    return long_uint_t<native_t, size>::operator<(that) ^ sign() ^ that.sign();
+    return (long_uint_t<native_t, size>::operator<(that) != sign()) != that.sign();
 }
 
 
