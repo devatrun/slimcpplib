@@ -121,10 +121,10 @@ using half_t = typename half_type<type_t>::type;
 
 // make array from specified array
 
-template<typename type_t, uint_t size, typename func_t>
-constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func);
-template<typename type_t, uint_t size, typename func_t, uint_t... idx>
-constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>);
+template<uint_t size_out, typename type_t, uint_t size_in, typename func_t>
+constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func);
+template<uint_t size_out, typename type_t, uint_t size_in, typename func_t, uint_t... idx>
+constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>);
 
 // extract low half of unsigned integer
 
@@ -190,19 +190,20 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, uint_t size, typename func_t>
-constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func)
+template<uint_t size_out, typename type_t, uint_t size_in, typename func_t>
+constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func)
 {
-    return make_array(arr, func, std::make_integer_sequence<uint_t, size>{});
+    constexpr uint_t size = std::min(size_in, size_out);
+    return make_array<size_out>(arr, func, std::make_integer_sequence<uint_t, size>{});
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t size, typename func_t, uint_t... idx>
-constexpr std::array<type_t, size> make_array(const std::array<type_t, size>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>)
+template<uint_t size_out, typename type_t, uint_t size_in, typename func_t, uint_t... idx>
+constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>)
 {
-    return std::array<type_t, size>{ (func(idx, arr[idx]))... };
+    return std::array<type_t, size_out>{ (func(arr, idx))... };
 }
 
 

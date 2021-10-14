@@ -161,13 +161,8 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_uint_t<native_t, size>::long_uint_t(const long_uint_t<native_t, other_size>& that) noexcept
+: digits(make_array<size>(that.digits, [](const auto& digits, uint_t idx) { return digits[idx]; }))
 {
-    constexpr uint_t value_size = std::min(size, other_size);
-
-    for (uint_t n = 0; n < value_size; ++n)
-        digits[n] = that.digits[n];
-    for (uint_t n = value_size; n < std::size(digits); ++n)
-        digits[n] = native_t(0);
 }
 
 template<typename native_t, uint_t size>
@@ -179,17 +174,18 @@ constexpr long_uint_t<native_t, size>::long_uint_t(native_array_t digits) noexce
 template<typename native_t, uint_t size>
 template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int>>
 constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
-{
+: digits(make_array<size>(digits, [&value](const auto& /*digits*/, uint_t idx) {
+
     constexpr uint_t value_size = std::min(size, (byte_count_v<type_t> + byte_count_v<native_t> - 1) / byte_count_v<native_t>);
-    const native_t extension = 0;
 
-    for (uint_t n = 0; n < value_size; ++n) {
+    if (idx >= value_size)
+        return native_t(0);
 
-        digits[n] = value & ~native_t(0);
-        value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
-    }
-    for (uint_t n = value_size; n < std::size(digits); ++n)
-        digits[n] = extension;
+    const native_t digit = value & ~native_t(0);
+    value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
+    return digit;
+}))
+{
 }
 
 template<typename native_t, uint_t size>
@@ -237,12 +233,7 @@ template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_uint_t<native_t, size>::operator long_uint_t<native_t, other_size>() const noexcept
 {
-    long_uint_t<native_t, other_size> tmp;
-
-    for (uint_t n = 0; n < other_size; ++n)
-        tmp.digits[n] = digits[n];
-
-    return tmp;
+    return make_array<other_size>(digits, [](const auto& digits, uint_t idx) { return digits[idx]; });
 }
 
 
@@ -336,8 +327,8 @@ constexpr bool long_uint_t<native_t, size>::operator>=(const long_uint_t& that) 
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() const noexcept
 {
-    return make_array(digits, [](uint_t /*idx*/, native_t value) {
-        return ~value;
+    return make_array<size>(digits, [](const auto& digits, uint_t idx) {
+        return ~digits[idx];
     });
 }
 
@@ -576,8 +567,8 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
 {
     bool borrow = true;
 
-    return make_array(digits, [&borrow](uint_t /*idx*/, native_t value) {
-        return ~subb<native_t>(value, 0, borrow);
+    return make_array<size>(digits, [&borrow](const auto& digits, uint_t idx) {
+        return ~subb<native_t>(digits[idx], 0, borrow);
     });
 }
 

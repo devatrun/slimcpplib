@@ -153,12 +153,11 @@ constexpr long_int_t<native_t, size>::long_int_t(const long_uint_t<native_t, siz
 template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_int_t<native_t, size>::long_int_t(const long_int_t<native_t, other_size>& that) noexcept
+: long_uint_t<native_t, size>(that)
 {
     constexpr uint_t value_size = std::min(size, other_size);
     const native_t extension = static_cast<native_t>(!that.sign() ? 0 : native_t(~0));
 
-    for (uint_t n = 0; n < value_size; ++n)
-        digits[n] = that.digits[n];
     for (uint_t n = value_size; n < std::size(digits); ++n)
         digits[n] = extension;
 }
