@@ -160,22 +160,16 @@ constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t addc(type_t value1, type_t value2, bool& carry) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void add(type_t& value1, const type_t& value2) noexcept;
 
 // subtract with borrow
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void sub(type_t& value1, const type_t& value2) noexcept;
 
 // multiply with carry
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void mul(type_t& value1, const type_t& value2) noexcept;
 
 // divide with remainder
 
@@ -312,18 +306,6 @@ constexpr type_t addc(type_t value1, const type_t value2, bool& carry) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void add(type_t& value1, const type_t& value2) noexcept
-{
-    bool carry = false;
-
-    for (uint_t n = 0; n < std::size(value1); ++n)
-        value1[n] = addc(value1[n], value2[n], carry);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept
 {
@@ -338,18 +320,6 @@ constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept
 
     borrow = borrow_new;
     return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void sub(type_t& value1, const type_t& value2) noexcept
-{
-    bool borrow = false;
-
-    for (uint_t n = 0; n < std::size(value1); ++n)
-        value1[n] = subb(value1[n], value2[n], borrow);
 }
 
 
@@ -453,37 +423,6 @@ constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept
 {
     //return mulc_karatsuba(value1, value2, carry);
     return mulc_classic(value1, value2, carry);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void mul(type_t& value1, const type_t& value2) noexcept
-{
-    using value_t = typename type_t::value_type;
-    value_t carry = 0;
-
-    type_t result;
-    result[0] = mulc(value1[0], value2[0], carry);
-
-    for (uint_t n = 1; n < std::size(value1); ++n)
-        result[n] = mulc(value1[n], value2[0], carry);
-
-    for (uint_t n = 1; n < std::size(value1); ++n) {
-
-        type_t tmp;
-        carry = 0;
-
-        for (uint_t k = 0; k < n; ++k)
-            tmp[k] = 0;
-        for (uint_t k = 0; k < std::size(value1) - n; ++k)
-            tmp[k + n] = mulc(value1[k], value2[n], carry);
-
-        add(result, tmp);
-    }
-
-    value1 = result;
 }
 
 

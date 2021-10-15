@@ -34,6 +34,15 @@
 
 #include "long_math.h"
 
+#if __has_include("long_math_gcc.h")
+#include "long_math_gcc.h"
+#endif // __has_include("long_math_gcc.h")
+
+#if __has_include("long_math_msvc.h")
+#include "long_math_msvc.h"
+#endif // __has_include("long_math_msvc.h")
+
+
 namespace slim
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +115,21 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size> value1, long_
 
 template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size> value1, long_uint_t<type_t, size> value2, std::optional<long_uint_t<type_t, size>>& remainder) noexcept;
+
+// add two vectors
+
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void add(type_t& value1, const type_t& value2) noexcept;
+
+// subtract two vectors
+
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void sub(type_t& value1, const type_t& value2) noexcept;
+
+// multiply two vectors
+
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void mul(type_t& value1, const type_t& value2) noexcept;
 
 
 
@@ -319,6 +343,61 @@ constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size> value1, long_
     }
 
     return quotient;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void add(type_t& value1, const type_t& value2) noexcept
+{
+    bool carry = false;
+
+    for (uint_t n = 0; n < std::size(value1); ++n)
+        value1[n] = addc(value1[n], value2[n], carry);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void sub(type_t& value1, const type_t& value2) noexcept
+{
+    bool borrow = false;
+
+    for (uint_t n = 0; n < std::size(value1); ++n)
+        value1[n] = subb(value1[n], value2[n], borrow);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void mul(type_t& value1, const type_t& value2) noexcept
+{
+    using value_t = typename type_t::value_type;
+    value_t carry = 0;
+
+    type_t result;
+    result[0] = mulc(value1[0], value2[0], carry);
+
+    for (uint_t n = 1; n < std::size(value1); ++n)
+        result[n] = mulc(value1[n], value2[0], carry);
+
+    for (uint_t n = 1; n < std::size(value1); ++n) {
+
+        type_t tmp;
+        carry = 0;
+
+        for (uint_t k = 0; k < n; ++k)
+            tmp[k] = 0;
+        for (uint_t k = 0; k < std::size(value1) - n; ++k)
+            tmp[k + n] = mulc(value1[k], value2[n], carry);
+
+        add(result, tmp);
+    }
+
+    value1 = result;
 }
 
 } // namespace slim
