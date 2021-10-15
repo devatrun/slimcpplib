@@ -81,9 +81,9 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 ```
 ## Standard stream input/output
 ```c++
-std::cout << std::oct << 338770000845734292534325025077361652240_ui128 << "\n";       // octal output
-std::cout << std::dec << 03766713523035452062041773345651416625031020_ui128 << " \n"; // decimal output
-std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";            // hexadecimal output
+std::cout << std::oct << 338770000845734292534325025077361652240_ui128 << "\n";       // octal
+std::cout << std::dec << 03766713523035452062041773345651416625031020_ui128 << " \n"; // decimal
+std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";            // hexadecimal
 ```
 ## Limitations
 * Although all methods and functions are defined using the constexpr qualifier, due to the limitations of C++ 17, working completely at compile time is only possible for code without instrinsics, since there is no implementation of [std::is_constant_evaluated()](https://en.cppreference.com/w/cpp/types/is_constant_evaluated) in the standard before C++ 20.
