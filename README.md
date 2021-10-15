@@ -20,11 +20,13 @@ class long_int_t;  // signed integer
 ```
 where native_t may be one of base unsigned type and size must by power of two.
 ## Implementation
-* [long_int.h](include/slimcpplib/long_int.h) - signed long integer class
+* [long_int.h](include/slimcpplib/long_int.h) - signed long integer class (**Can be completely removed if not used**)
 * [long_uint.h](include/slimcpplib/long_uint.h) - unsigned long integer class
 * [long_math.h](include/slimcpplib/long_math.h) - cross-platform helper classes and functions
-* [long_math_gcc.h](include/slimcpplib/long_math_gcc.h) - GCC, CLANG helper classes and functions (Could be completely removed if irrelevant)
-* [long_math_msvc.h](include/slimcpplib/long_math_msvc.h) - MSVC helper classes and functions (Could be completely removed if irrelevant)
+* [long_math_long.h](include/slimcpplib/long_math_long.h) - cross-platform helper classes and functions (long_uint_t/long_int_t specializations)
+* [long_math_gcc.h](include/slimcpplib/long_math_gcc.h) - GCC, CLANG helper classes and functions (**Can be completely removed if irrelevant**)
+* [long_math_msvc.h](include/slimcpplib/long_math_msvc.h) - MSVC helper classes and functions (**Can be completely removed if irrelevant**)
+* [long_io.h](include/slimcpplib/long_io.h) - standard stream input/output (**Can be completely removed if not used**)
 ## Integration
 The library implements four predefined types: uint128_t, uint256_t, int128_t, int256_t. You can use them in your project by include code below:
 ```c++
@@ -76,6 +78,12 @@ The library implements the muldiv method for faster calculation of the following
 ```c++
 template<typename type_t>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept;
+```
+## Standard stream input/output
+```c++
+std::cout << std::oct << 338770000845734292534325025077361652240_ui128 << "\n";       // output value in octal form
+std::cout << std::dec << 03766713523035452062041773345651416625031020_ui128 << " \n"; // output value in decimal form
+std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";            // output value in hexadecimal form
 ```
 ## Limitations
 * Although all methods and functions are defined using the constexpr qualifier, due to the limitations of C++ 17, working completely at compile time is only possible for code without instrinsics, since there is no implementation of [std::is_constant_evaluated()](https://en.cppreference.com/w/cpp/types/is_constant_evaluated) in the standard before C++ 20.
