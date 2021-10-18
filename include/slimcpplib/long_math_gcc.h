@@ -44,6 +44,13 @@ namespace slim
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// calculate number of set bits
+
+uint_t popcnt(uint8_t value) noexcept;
+uint_t popcnt(uint16_t value) noexcept;
+uint_t popcnt(uint32_t value) noexcept;
+uint_t popcnt(uint64_t value) noexcept;
+
 // calculate leading zero bits
 
 uint_t nlz(uint8_t value) noexcept;
@@ -74,6 +81,38 @@ uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept;
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+inline uint_t popcnt(uint8_t value) noexcept
+{
+    return __builtin_popcount(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint16_t value) noexcept
+{
+    return __builtin_popcount(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint32_t value) noexcept
+{
+    return __builtin_popcount(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint64_t value) noexcept
+{
+    return __builtin_popcount(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint_t nlz(uint8_t value) noexcept
 {
     return value ? __builtin_clz(value) : bit_count_v<uint8_t>;

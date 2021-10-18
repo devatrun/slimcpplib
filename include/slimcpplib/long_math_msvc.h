@@ -44,6 +44,13 @@ namespace slim
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// calculate number of set bits
+
+uint_t popcnt(uint8_t value) noexcept;
+uint_t popcnt(uint16_t value) noexcept;
+uint_t popcnt(uint32_t value) noexcept;
+uint_t popcnt(uint64_t value) noexcept;
+
 // calculate leading zero bits
 
 uint_t nlz(uint8_t value) noexcept;
@@ -86,6 +93,42 @@ uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept;
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+inline uint_t popcnt(uint8_t value) noexcept
+{
+    return __popcnt16(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint16_t value) noexcept
+{
+    return __popcnt16(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint32_t value) noexcept
+{
+    return __popcnt(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint_t popcnt(uint64_t value) noexcept
+{
+#ifdef _M_X64
+    return __popcnt64(value);
+#else
+    return __popcnt(static_cast<uint32_t>(half_hi(value))) + __popcnt(static_cast<uint32_t>(half_lo(value)));
+#endif // _M_X64
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint_t nlz(uint8_t value) noexcept
 {
     unsigned long result = 0;

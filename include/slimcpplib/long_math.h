@@ -141,17 +141,27 @@ constexpr type_t half_hi(type_t value) noexcept;
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t half_make_hi(type_t value) noexcept;
 
+// propagate most significant bit to the right
+
+template<typename type_t, uint_t byte_count = byte_count_v<type_t>, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t pmsbr(type_t value) noexcept;
+
+// calculate number of set bits
+
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr uint_t popcnt(type_t value) noexcept;
+
 // calculate leading zero bits
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr uint_t nlz(type_t value) noexcept;
 
-// shift bits to left
+// shift bits to the left
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
-// shift bits to right
+// shift bits to the right
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
@@ -230,19 +240,87 @@ constexpr type_t half_make_hi(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t byte_count, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr type_t pmsbr(type_t value) noexcept
+{
+    if constexpr (byte_count == 1) {
+
+        value |= (value >> 1);
+        value |= (value >> 2);
+        value |= (value >> 4);
+
+    } else {
+
+        value = pmsbr<type_t, byte_count / 2>(value);
+        value |= (value >> (4 * byte_count));
+    }
+
+    return value;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t bit_count = bit_count_v<type_t>, uint_t mask_count = bit_count_v<type_t> / bit_count, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t popcnt_msk() noexcept
+{
+    if constexpr (mask_count == 1) {
+
+        return pmsbr<type_t>(type_t(1) << (bit_count / 2 - 1));
+
+    } else {
+
+        constexpr type_t mask = popcnt_msk<type_t, bit_count, mask_count - 1>();
+        return mask | (mask << (bit_count));
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t byte_count = byte_count_v<type_t>, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t popcnt_impl(type_t value) noexcept
+{
+    if constexpr (byte_count <= 4) {
+
+        constexpr type_t mask2 = popcnt_msk<type_t, 2>();
+        constexpr type_t mask4 = popcnt_msk<type_t, 4>();
+        constexpr type_t mask8 = popcnt_msk<type_t, 8>();
+
+        value = value - ((value >> 1) & mask2);
+        value = (value & mask4) + ((value >> 2) & mask4);
+        value = (value + (value >> 4)) & mask8;
+
+        if constexpr (byte_count >= 2)
+            value = value + (value >> 8);
+        if constexpr (byte_count >= 3)
+            value = value + (value >> 16);
+
+    } else {
+
+        value = popcnt_impl<type_t, byte_count / 2>(value);
+        value = value + (value >> 4 * byte_count);
+    }
+
+    return value;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr uint_t popcnt(type_t value) noexcept
+{
+    return popcnt_impl<type_t>(value) & ((bit_count_v<type_t> << 2) - 1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr uint_t nlz(type_t value) noexcept
 {
-    uint_t result = 0;
-    type_t mask = type_t(1) << (bit_count_v<type_t> - 1);
-
-    while ((~value & mask) != 0) {
-
-        mask >>= 1;
-        result++;
-    }
-
-    return result;
+    return bit_count_v<type_t> - popcnt(pmsbr(value));
 }
 
 
@@ -470,7 +548,7 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 
     const type_t t1 = quotient_hi * nvalue2_lo;
     const type_t t2 = half_make_hi(*remainder_hi) | nvalue1_hi;
-    
+
     if (t1 > t2) {
 
         --quotient_hi;
@@ -483,7 +561,7 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 
     std::optional<type_t> remainder_lo = type_t();
     type_t quotient_lo = divr(nvalue1_21, nvalue2_hi, remainder_lo);
-    
+
     const type_t t3 = quotient_lo * nvalue2_lo;
     const type_t t4 = half_make_hi(*remainder_lo) | nvalue1_lo;
 
