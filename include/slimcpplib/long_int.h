@@ -80,6 +80,7 @@ public:
     constexpr long_int_t& operator=(long_int_t&& that) noexcept = default;
 
     constexpr bool sign() const noexcept;
+    constexpr long_int_t& negate() noexcept;
     template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
     explicit constexpr operator long_int_t<native_t, other_size>() const noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
@@ -209,6 +210,21 @@ constexpr bool long_int_t<native_t, size>::sign() const noexcept
 {
     return std::make_signed_t<native_t>(digits[hi]) < 0;
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::negate() noexcept
+{
+    bool borrow = true;
+
+    for (uint_t n = 0; n < std::size(digits); ++n)
+        digits[n] = ~subb<native_t>(digits[n], 0, borrow);
+
+    return *this;
+}
+
 
 
 
@@ -379,15 +395,10 @@ constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator-() con
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator*=(const long_int_t& that) noexcept
 {
-    const long_uint_t<native_t, size> value1 = this->sign() ? -*this : *this;
-    const long_uint_t<native_t, size> value2 = that.sign() ? -that : that;
+    long_uint_t<native_t, size>::operator*=(that.sign() ? -that : that);
 
-    long_uint_t<native_t, size> result = value1 * value2;
-
-    if (this->sign() ^ that.sign())
-        result = -result;
-
-    *this = result;
+    if (that.sign())
+        negate();
 
     return *this;
 }
