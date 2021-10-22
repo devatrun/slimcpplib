@@ -6,6 +6,7 @@ The main features:
 * small: consists of few header files, there is no dependencies
 * speed: use intrinsics if supported
 * cross-platform: supports MSVC, GCC and CLANG C++17 compilers
+* exception neutral: doesn't use exceptions, all methods are noexсept
 
 The library implements two main classes:
 ```c++
