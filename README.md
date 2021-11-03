@@ -1,6 +1,6 @@
 # SLIMCPP
 # Simple long integer math library for C++
-SLIMCPP is C++ header-only library that implements long integers that exceed maximum size of native type supported by a specific compiler by 2-4 times. All classes, methods and functions were not created or designed to work with huge numbers, for which there are specialized mathematical libraries. In some cases, it is necessary to temporarily perform calculations with precision exceeding the maximum supported size of integers, and then return the result to its native size again. The conditions are ideal for SLIMCPP.
+SLIMCPP is C++ header-only library that implements long integers that exceed maximum size of native type supported by a specific compiler by 2-4 times. All classes, methods and functions were not created or designed to work with huge numbers, for which there are specialized big integer mathematical libraries. In some cases, it is necessary to temporarily perform calculations with precision exceeding the maximum supported size of integers, and then return the result to its native size again. The conditions are ideal for SLIMCPP.
 The main features:
 * easy to use: the library is header-only
 * small: consists of few header files, there is no dependencies
