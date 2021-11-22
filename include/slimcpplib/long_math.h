@@ -317,7 +317,7 @@ constexpr type_t popcnt_impl(type_t value) noexcept
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr uint_t popcnt(type_t value) noexcept
 {
-    return popcnt_impl<type_t>(value) & ((bit_count_v<type_t> << 2) - 1);
+    return static_cast<uint_t>(popcnt_impl<type_t>(value) & ((bit_count_v<type_t> << 2) - 1));
 }
 
 
