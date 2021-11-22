@@ -277,10 +277,14 @@ constexpr bool long_uint_t<native_t, size>::operator!=(const long_uint_t& that) 
 template<typename native_t, uint_t size>
 constexpr bool long_uint_t<native_t, size>::operator<(const long_uint_t& that) const noexcept
 {
-    bool borrow = false;
+    native_t digit = digits[0];
+    bool borrow = sub(digit, that.digits[0]);
 
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        subb(digits[n], that.digits[n], borrow);
+    for (uint_t n = 1; n < std::size(digits); ++n) {
+
+        digit = digits[n];
+        borrow = subb(digit, that.digits[n], borrow);
+    }
 
     return borrow;
 }
@@ -559,7 +563,10 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
     bool borrow = true;
 
     return make_array<size>(digits, [&borrow](const auto& digits, uint_t idx) {
-        return ~subb<native_t>(digits[idx], 0, borrow);
+
+        native_t digit = digits[idx];
+        borrow = subb<native_t>(digit, 0, borrow);
+        return ~digit;
     });
 }
 
@@ -747,8 +754,8 @@ constexpr long_uint_t<native_t, size> operator%(type_t value1, const long_uint_t
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept
 {
-    type_t mul_hi = 0;
-    const type_t mul_lo = mulc(value, multiplier, mul_hi);
+    type_t mul_lo = value;
+    const type_t mul_hi = mul(mul_lo, multiplier);
 
     if (mul_hi == 0)
         return mul_lo / divider;
@@ -790,10 +797,7 @@ constexpr type_t mulc_costexpr(const type_t& value1, const type_t& value2, type_
     type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
     type_t result_hi = t3 + half_hi(t1);
 
-    bool add_carry = false;
-    result_lo = addc<type_t>(result_lo, carry, add_carry);
-    result_hi += add_carry;
-
+    result_hi += add<type_t>(result_lo, carry);
     carry = result_hi;
 
     return result_lo;

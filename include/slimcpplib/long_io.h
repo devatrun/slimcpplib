@@ -139,7 +139,7 @@ inline std::basic_istream<char_t, traits_t>& operator>>(std::basic_istream<char_
     for (uint_t digit_idx = 0; digit_idx < digit_count; ++digit_idx) {
 
         long_uint_t carry = impl::from_char(input[digit_idx]);
-        value = mulc(value, long_uint_t(base), carry);
+        carry = mulc(value, long_uint_t(base), carry);
 
         if (carry > 0)
             throw std::ios::failure("Input integer value is out of range.");

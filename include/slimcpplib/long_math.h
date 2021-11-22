@@ -169,17 +169,23 @@ constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 // add with carry
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t addc(type_t value1, type_t value2, bool& carry) noexcept;
+constexpr bool add(type_t& value1, type_t value2) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept;
 
 // subtract with borrow
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept;
+constexpr bool sub(type_t& value1, type_t value2) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept;
 
 // multiply with carry
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept;
+constexpr type_t mul(type_t& value1, type_t value2) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept;
 
 // divide with remainder
 
@@ -367,44 +373,58 @@ constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t addc(type_t value1, const type_t value2, bool& carry) noexcept
+constexpr bool add(type_t& value1, type_t value2) noexcept
 {
-    bool carry_new = false;
-
-    type_t result = value1;
-    result += value2;
-    carry_new = carry_new || (result < value2);
-    result += carry;
-    carry_new = carry_new || (result < type_t(carry));
-
-    carry = carry_new;
-    return result;
+    value1 += value2;
+    return value1 < value2;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t subb(type_t value1, type_t value2, bool& borrow) noexcept
+constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept
 {
-    bool borrow_new = false;
+    value1 += value2;
+    bool carry_new = value1 < value2;
+    value1 += carry;
+    carry_new = carry_new || (value1 < type_t(carry));
 
-    type_t result = value1;
-    result -= value2;
-    borrow_new = borrow_new || (result > value1);
-    type_t result_tmp = result;
-    result -= borrow;
-    borrow_new = borrow_new || (result > result_tmp);
-
-    borrow = borrow_new;
-    return result;
+    return carry_new;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc_classic(type_t value1, type_t value2, type_t& carry) noexcept
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr bool sub(type_t& value1, type_t value2) noexcept
+{
+    const type_t tmp = value1;
+    value1 -= value2;
+    return value1 > tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept
+{
+    type_t tmp = value1;
+    value1 -= value2;
+    bool borrow_new = value1 > tmp;
+    tmp = value1;
+    value1 -= borrow;
+    borrow_new = borrow_new || (value1 > tmp);
+
+    return borrow_new;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr type_t mul(type_t& value1, type_t value2) noexcept
 {
     const type_t value1_lo = half_lo(value1);
     const type_t value1_hi = half_hi(value1);
@@ -419,88 +439,34 @@ constexpr type_t mulc_classic(type_t value1, type_t value2, type_t& carry) noexc
     const type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
     const type_t result_hi = t3 + half_hi(t1);
 
-    bool add_carry = false;
-    const type_t result = addc(result_lo, carry, add_carry);
-    carry = result_hi + add_carry;
+    value1 = result_lo;
 
-    return result;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc_karatsuba(type_t value1, type_t value2, type_t& carry) noexcept
-{
-    const type_t value1_lo = half_lo(value1);
-    const type_t value1_hi = half_hi(value1);
-    const type_t value2_lo = half_lo(value2);
-    const type_t value2_hi = half_hi(value2);
-
-    const type_t x = value1_hi * value2_hi;
-    const type_t y = value1_lo * value2_lo;
-
-    const type_t a_plus_b = value1_lo + value1_hi;
-    const type_t c_plus_d = value2_lo + value2_hi;
-    assert(half_hi(a_plus_b) <= 1);
-    assert(half_hi(c_plus_d) <= 1);
-    const type_t a_plus_b_lo = half_lo(a_plus_b);
-    const type_t a_plus_b_hi = half_hi(a_plus_b);
-    const type_t c_plus_d_lo = half_lo(c_plus_d);
-    const type_t c_plus_d_hi = half_hi(c_plus_d);
-
-    type_t z_lo = a_plus_b_lo * c_plus_d_lo;
-    type_t z_hi = 0;
-
-    if (a_plus_b_hi != 0) {
-
-        bool add_carry = false;
-        z_lo = addc(z_lo, half_make_hi(c_plus_d_lo), add_carry);
-        z_hi += add_carry;
-    }
-
-    if (c_plus_d_hi != 0) {
-
-        bool add_carry = false;
-        z_lo = addc(z_lo, half_make_hi(a_plus_b_lo), add_carry);
-        z_hi += add_carry;
-    }
-
-    if (half_hi(a_plus_b) != 0 && half_hi(c_plus_d) != 0)
-        ++z_hi;
-
-    bool sub_borrow = false;
-    z_lo = subb(z_lo, x, sub_borrow);
-    z_hi -= sub_borrow;
-    sub_borrow = false;
-    z_lo = subb(z_lo, y, sub_borrow);
-    z_hi -= sub_borrow;
-    assert(z_hi <= 1);
-
-    z_hi = shl2(z_hi, z_lo, bit_count_v<type_t> / 2);
-    z_lo <<= bit_count_v<type_t> / 2;
-
-    type_t result_lo = y;
-    type_t result_hi = x;
-
-    bool add_carry = false;
-    result_lo = addc(result_lo, z_lo, add_carry);
-    result_hi += z_hi + add_carry;
-    add_carry = false;
-    result_lo = addc(result_lo, carry, add_carry);
-    carry = result_hi + add_carry;
-
-    return result_lo;
+    return result_hi;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t mulc(type_t value1, type_t value2, type_t& carry) noexcept
+constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 {
-    //return mulc_karatsuba(value1, value2, carry);
-    return mulc_classic(value1, value2, carry);
+    const type_t value1_lo = half_lo(value1);
+    const type_t value1_hi = half_hi(value1);
+    const type_t value2_lo = half_lo(value2);
+    const type_t value2_hi = half_hi(value2);
+
+    const type_t t0 = value1_lo * value2_lo;
+    const type_t t1 = value1_hi * value2_lo + half_hi(t0);
+    const type_t t2 = value1_lo * value2_hi + half_lo(t1);
+    const type_t t3 = value1_hi * value2_hi + half_hi(t2);
+
+    type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
+    type_t result_hi = t3 + half_hi(t1);
+
+    result_hi += add(result_lo, carry);
+    value1 = result_lo;
+
+    return result_hi;
 }
 
 

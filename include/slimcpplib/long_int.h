@@ -219,8 +219,11 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::negate() noexc
 {
     bool borrow = true;
 
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] = ~subb<native_t>(digits[n], 0, borrow);
+    for (uint_t n = 0; n < std::size(digits); ++n) {
+
+        borrow = subb<native_t>(digits[n], 0, borrow);
+        digits[n] = ~digits[n];
+    }
 
     return *this;
 }

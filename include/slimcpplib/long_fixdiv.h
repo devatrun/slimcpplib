@@ -157,10 +157,13 @@ constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const ty
 template<typename type_t>
 constexpr type_t long_fixed_divider<type_t>::divide(const type_t& dividend) const noexcept
 {
-    type_t mul_hi = addition;
-    const type_t mul_lo = mulc(dividend, multiplier, mul_hi);
+    type_t mul_lo = dividend;
+    type_t mul_hi = mul(mul_lo, multiplier);
+        
+    if (addition != 0)
+        mul_hi += add(mul_lo, addition);
     
-    return mul_hi >> shift;
+    return mul_hi >>= shift;
 }
 
 

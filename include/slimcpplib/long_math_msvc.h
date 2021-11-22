@@ -68,24 +68,39 @@ uint64_t shr2(uint64_t value_hi, uint64_t value_lo, uint_t shift) noexcept;
 
 // add with carry
 
-uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept;
-uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept;
-uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept;
-uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept;
+bool add(uint8_t& value1, uint8_t value2) noexcept;
+bool add(uint16_t& value1, uint16_t value2) noexcept;
+bool add(uint32_t& value1, uint32_t value2) noexcept;
+bool add(uint64_t& value1, uint64_t value2) noexcept;
+
+bool addc(uint8_t& value1, uint8_t value2, bool carry) noexcept;
+bool addc(uint16_t& value1, uint16_t value2, bool carry) noexcept;
+bool addc(uint32_t& value1, uint32_t value2, bool carry) noexcept;
+bool addc(uint64_t& value1, uint64_t value2, bool carry) noexcept;
 
 // subtract with borrow
 
-uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept;
-uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept;
-uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept;
-uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept;
+bool sub(uint8_t& value1, uint8_t value2) noexcept;
+bool sub(uint16_t& value1, uint16_t value2) noexcept;
+bool sub(uint32_t& value1, uint32_t value2) noexcept;
+bool sub(uint64_t& value1, uint64_t value2) noexcept;
+
+bool subb(uint8_t& value1, uint8_t value2, bool borrow) noexcept;
+bool subb(uint16_t& value1, uint16_t value2, bool borrow) noexcept;
+bool subb(uint32_t& value1, uint32_t value2, bool borrow) noexcept;
+bool subb(uint64_t& value1, uint64_t value2, bool borrow) noexcept;
 
 // multiply with carry
 
-uint8_t mulc(uint8_t value1, uint8_t value2, uint8_t& carry) noexcept;
-uint16_t mulc(uint16_t value1, uint16_t value2, uint16_t& carry) noexcept;
-uint32_t mulc(uint32_t value1, uint32_t value2, uint32_t& carry) noexcept;
-uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept;
+uint8_t mul(uint8_t& value1, uint8_t value2) noexcept;
+uint16_t mul(uint16_t& value1, uint16_t value2) noexcept;
+uint32_t mul(uint32_t& value1, uint32_t value2) noexcept;
+uint64_t mul(uint64_t& value1, uint64_t value2) noexcept;
+
+uint8_t mulc(uint8_t& value1, uint8_t value2, uint8_t carry) noexcept;
+uint16_t mulc(uint16_t& value1, uint16_t value2, uint16_t carry) noexcept;
+uint32_t mulc(uint32_t& value1, uint32_t value2, uint32_t carry) noexcept;
+uint64_t mulc(uint64_t& value1, uint64_t value2, uint64_t carry) noexcept;
 
 
 
@@ -211,45 +226,69 @@ inline uint64_t shr2(uint64_t value_hi, uint64_t value_lo, uint_t shift) noexcep
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t addc(uint8_t value1, uint8_t value2, bool& carry) noexcept
+inline bool add(uint8_t& value1, uint8_t value2) noexcept
 {
-    uint8_t result;
-    carry = _addcarry_u8(carry, value1, value2, &result);
-
-    return result;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t addc(uint16_t value1, uint16_t value2, bool& carry) noexcept
-{
-    uint16_t result;
-    carry = _addcarry_u16(carry, value1, value2, &result);
-
-    return result;
+    return _addcarry_u8(0, value1, value2, &value1);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t addc(uint32_t value1, uint32_t value2, bool& carry) noexcept
+inline bool add(uint16_t& value1, uint16_t value2) noexcept
 {
-    uint32_t result;
-    carry = _addcarry_u32(carry, value1, value2, &result);
-
-    return result;
+    return _addcarry_u16(0, value1, value2, &value1);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t addc(uint64_t value1, uint64_t value2, bool& carry) noexcept
+inline bool add(uint32_t& value1, uint32_t value2) noexcept
+{
+    return _addcarry_u32(0, value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool add(uint64_t& value1, uint64_t value2) noexcept
 {
 #ifdef _M_X64
-    uint64_t result;
-    carry = _addcarry_u64(carry, value1, value2, &result);
+    return _addcarry_u64(0, value1, value2, &value1);
+#else
+    return add<uint64_t>(value1, value2);
+#endif // _M_X64
+}
 
-    return result;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool addc(uint8_t& value1, uint8_t value2, bool carry) noexcept
+{
+    return _addcarry_u8(carry, value1, value2, &value1);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool addc(uint16_t& value1, uint16_t value2, bool carry) noexcept
+{
+    return _addcarry_u16(carry, value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool addc(uint32_t& value1, uint32_t value2, bool carry) noexcept
+{
+    return _addcarry_u32(carry, value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool addc(uint64_t& value1, uint64_t value2, bool carry) noexcept
+{
+#ifdef _M_X64
+    return _addcarry_u64(carry, value1, value2, &value1);
 #else
     return addc<uint64_t>(value1, value2, carry);
 #endif // _M_X64
@@ -277,48 +316,71 @@ inline void add(std::array<type_t, size>& value1, const std::array<type_t, size>
 #endif // _M_X64
 
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t subb(uint8_t value1, uint8_t value2, bool& borrow) noexcept
+inline bool sub(uint8_t& value1, uint8_t value2) noexcept
 {
-    uint8_t result;
-    borrow = _subborrow_u8(borrow, value1, value2, &result);
-
-    return result;
+    return _subborrow_u8(0, value1, value2, &value1);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t subb(uint16_t value1, uint16_t value2, bool& borrow) noexcept
+inline bool sub(uint16_t& value1, uint16_t value2) noexcept
 {
-    uint16_t result;
-    borrow = _subborrow_u16(static_cast<uint8_t>(borrow), value1, value2, &result);
-
-    return result;
+    return _subborrow_u16(0, value1, value2, &value1);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t subb(uint32_t value1, uint32_t value2, bool& borrow) noexcept
+inline bool sub(uint32_t& value1, uint32_t value2) noexcept
 {
-    uint32_t result;
-    borrow = _subborrow_u32(static_cast<uint8_t>(borrow), value1, value2, &result);
-
-    return result;
+    return _subborrow_u32(0, value1, value2, &value1);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t subb(uint64_t value1, uint64_t value2, bool& borrow) noexcept
+inline bool sub(uint64_t& value1, uint64_t value2) noexcept
 {
 #ifdef _M_X64
-    uint64_t result;
-    borrow = _subborrow_u64(static_cast<uint8_t>(borrow), value1, value2, &result);
+    return _subborrow_u64(0, value1, value2, &value1);
+#else
+    return sub<uint64_t>(value1, value2);
+#endif // _M_X64
+}
 
-    return result;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool subb(uint8_t& value1, uint8_t value2, bool borrow) noexcept
+{
+    return _subborrow_u8(borrow, value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool subb(uint16_t& value1, uint16_t value2, bool borrow) noexcept
+{
+    return _subborrow_u16(static_cast<uint8_t>(borrow), value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool subb(uint32_t& value1, uint32_t value2, bool borrow) noexcept
+{
+    return _subborrow_u32(static_cast<uint8_t>(borrow), value1, value2, &value1);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline bool subb(uint64_t& value1, uint64_t value2, bool borrow) noexcept
+{
+#ifdef _M_X64
+    return _subborrow_u64(static_cast<uint8_t>(borrow), value1, value2, &value1);
 #else
     return subb<uint64_t>(value1, value2, borrow);
 #endif // _M_X64
@@ -348,54 +410,92 @@ inline void sub(std::array<type_t, size>& value1, const std::array<type_t, size>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint8_t mulc(uint8_t value1, uint8_t value2, uint8_t& carry) noexcept
+inline uint8_t mul(uint8_t& value1, uint8_t value2) noexcept
 {
-    const uint16_t result = uint16_t(value1) * uint16_t(value2) + uint16_t(carry);
-    carry = static_cast<uint8_t>(half_hi(result));
+    const uint16_t result = uint16_t(value1) * uint16_t(value2);
+    value1 = static_cast<uint8_t>(result);
 
-    return static_cast<uint8_t>(result);
+    return static_cast<uint8_t>(half_hi(result));
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint16_t mulc(uint16_t value1, uint16_t value2, uint16_t& carry) noexcept
+inline uint16_t mul(uint16_t& value1, uint16_t value2) noexcept
 {
-    const uint32_t result = uint32_t(value1) * uint32_t(value2) + uint32_t(carry);
-    carry = static_cast<uint16_t>(half_hi(result));
+    const uint32_t result = uint32_t(value1) * uint32_t(value2);
+    value1 = static_cast<uint16_t>(result);
 
-    return static_cast<uint16_t>(result);
+    return static_cast<uint16_t>(half_hi(result));
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint32_t mulc(uint32_t value1, uint32_t value2, uint32_t& carry) noexcept
+inline uint32_t mul(uint32_t& value1, uint32_t value2) noexcept
 {
-    const uint64_t result = uint64_t(value1) * uint64_t(value2) + uint64_t(carry);
-    carry = static_cast<uint32_t>(half_hi(result));
+    const uint64_t result = uint64_t(value1) * uint64_t(value2);
+    value1 = static_cast<uint32_t>(result);
 
-    return static_cast<uint32_t>(result);
+    return static_cast<uint32_t>(half_hi(result));
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-inline uint64_t mulc(uint64_t value1, uint64_t value2, uint64_t& carry) noexcept
+inline uint64_t mul(uint64_t& value1, uint64_t value2) noexcept
 {
 #ifdef _M_X64
-    uint64_t result_lo;
     uint64_t result_hi;
+    value1 = _umul128(value1, value2, &result_hi);
+    return result_hi;
+#else
+    return mul<uint64_t>(value1, value2);
+#endif // _M_X64
+}
 
-    result_lo = _umul128(value1, value2, &result_hi);
 
-    bool add_carry = false;
-    result_lo = addc(result_lo, carry, add_carry);
-    result_hi += add_carry;
 
-    carry = result_hi;
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint8_t mulc(uint8_t& value1, uint8_t value2, uint8_t carry) noexcept
+{
+    const uint16_t result = uint16_t(value1) * uint16_t(value2) + uint16_t(carry);
+    value1 = static_cast<uint8_t>(result);
 
-    return result_lo;
+    return static_cast<uint8_t>(half_hi(result));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint16_t mulc(uint16_t& value1, uint16_t value2, uint16_t carry) noexcept
+{
+    const uint32_t result = uint32_t(value1) * uint32_t(value2) + uint32_t(carry);
+    value1 = static_cast<uint16_t>(result);
+
+    return static_cast<uint16_t>(half_hi(result));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint32_t mulc(uint32_t& value1, uint32_t value2, uint32_t carry) noexcept
+{
+    const uint64_t result = uint64_t(value1) * uint64_t(value2) + uint64_t(carry);
+    value1 = static_cast<uint32_t>(result);
+
+    return static_cast<uint32_t>(half_hi(result));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+inline uint64_t mulc(uint64_t& value1, uint64_t value2, uint64_t carry) noexcept
+{
+#ifdef _M_X64
+    uint64_t result_hi;
+    value1 = _umul128(value1, value2, &result_hi);
+    return result_hi + add(value1, carry);
 #else
     return mulc<uint64_t>(value1, value2, carry);
 #endif // _M_X64
