@@ -52,7 +52,7 @@ public:
     constexpr long_fixed_divider(const long_fixed_divider& that) noexcept = default;
     constexpr long_fixed_divider(long_fixed_divider&& that) noexcept = default;
     constexpr long_fixed_divider(const type_t& divider) noexcept;
-    constexpr long_fixed_divider(const type_t& multiplier, const type_t& addition, const type_t& shift) noexcept;
+    constexpr long_fixed_divider(const type_t& multiplier, const type_t& addition, const uint_t& shift) noexcept;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // public methods
@@ -64,6 +64,7 @@ public:
     static constexpr long_fixed_divider create(const type_t& divider) noexcept;
     constexpr type_t divide(const type_t& dividend) const noexcept;
 
+private:
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // data members
 
@@ -78,9 +79,9 @@ public:
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <typename type_t>
+template<typename type_t>
 constexpr long_fixed_divider<type_t> make_fixed_divider(const type_t value) noexcept;
-template <typename type_t>
+template<typename type_t>
 constexpr type_t operator/(const type_t& dividend, const long_fixed_divider<type_t>& divider) noexcept;
 
 
@@ -99,7 +100,7 @@ constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& divider) 
 }
 
 template<typename type_t>
-constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& multiplier, const type_t& addition, const type_t& shift) noexcept
+constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& multiplier, const type_t& addition, const uint_t& shift) noexcept
 : multiplier(std::move(multiplier))
 , addition(std::move(addition))
 , shift(std::move(shift))
@@ -111,6 +112,27 @@ constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& multiplie
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // public methods
 
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr uint_t nlz_costexpr(type_t value) noexcept
+{
+    type_t mask = ~type_t(0) ^ ((~type_t(0)) / 2);
+    uint_t count = 0;
+
+    for (uint_t n = 0; n < bit_count_v<type_t>; ++n) {
+
+        if ((value & mask) != 0)
+            break;
+
+        mask /= 2;
+        ++count;
+    }
+
+    return count;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t>
 constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const type_t& divider) noexcept
 {
@@ -137,8 +159,8 @@ constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const ty
 
         if (divider == 1) {
 
-            multiplier = ~multiplier;
-            addition = multiplier;
+            multiplier = ~type_t(0);
+            addition = ~type_t(0);
             shift = 0;
 
         } else {
@@ -150,7 +172,7 @@ constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const ty
 
     return long_fixed_divider(multiplier, addition, shift);
 }
-    
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,10 +181,10 @@ constexpr type_t long_fixed_divider<type_t>::divide(const type_t& dividend) cons
 {
     type_t mul_lo = dividend;
     type_t mul_hi = mul(mul_lo, multiplier);
-        
-    if (addition != 0)
-        mul_hi += add(mul_lo, addition);
-    
+
+    //if (addition != 0)
+    mul_hi += add(mul_lo, addition);
+
     return mul_hi >>= shift;
 }
 
