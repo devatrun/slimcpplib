@@ -159,8 +159,8 @@ constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const ty
 
         if (divider == 1) {
 
-            multiplier = ~type_t(0);
-            addition = ~type_t(0);
+            multiplier = type_t(~type_t(0));
+            addition = type_t(~type_t(0));
             shift = 0;
 
         } else {
@@ -182,8 +182,8 @@ constexpr type_t long_fixed_divider<type_t>::divide(const type_t& dividend) cons
     type_t mul_lo = dividend;
     type_t mul_hi = mul(mul_lo, multiplier);
 
-    //if (addition != 0)
-    mul_hi += add(mul_lo, addition);
+    if (addition != 0)
+        mul_hi += add(mul_lo, addition);
 
     return mul_hi >>= shift;
 }
