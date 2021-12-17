@@ -474,6 +474,42 @@ constexpr bool operator!=(type_t value1, const long_int_t<native_t, size>& value
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+constexpr bool operator<(type_t value1, const long_int_t<native_t, size>& value2) noexcept
+{
+    return long_int_t<native_t, size>(value1) < value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+constexpr bool operator<=(type_t value1, const long_int_t<native_t, size>& value2) noexcept
+{
+    return long_int_t<native_t, size>(value1) <= value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+constexpr bool operator>(type_t value1, const long_int_t<native_t, size>& value2) noexcept
+{
+    return long_int_t<native_t, size>(value1) > value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+constexpr bool operator>=(type_t value1, const long_int_t<native_t, size>& value2) noexcept
+{
+    return long_int_t<native_t, size>(value1) >= value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_int_t<native_t, size> operator+(type_t value1, const long_int_t<native_t, size>& value2) noexcept
 {
