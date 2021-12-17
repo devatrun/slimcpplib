@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.0
+// version 1.3
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -42,7 +42,6 @@
 #include "long_math_msvc.h"
 #endif // __has_include("long_math_msvc.h")
 
-
 namespace slim
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +52,36 @@ template<typename type_t, uint_t size>
 class long_uint_t;
 template<typename type_t, uint_t size>
 class long_int_t;
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// make_unsigned_t
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename native_t, uint_t size>
+struct make_unsigned<long_uint_t<native_t, size>> {
+    using type = long_uint_t<native_t, size>;
+};
+template<typename native_t, uint_t size>
+struct make_unsigned<long_int_t<native_t, size>> {
+    using type = long_uint_t<native_t, size>;
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// make_signed_t
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename native_t, uint_t size>
+struct make_signed<long_uint_t<native_t, size>> {
+    using type = long_int_t<native_t, size>;
+};
+template<typename native_t, uint_t size>
+struct make_signed<long_int_t<native_t, size>> {
+    using type = long_int_t<native_t, size>;
+};
 
 
 
@@ -101,6 +130,13 @@ constexpr long_uint_t<type_t, 2> half_make(const type_t& high, const type_t& low
 template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> half_make_hi(const long_uint_t<type_t, size>& value) noexcept;
 
+// return most significant bit
+
+template<typename type_t, uint_t size>
+constexpr bool sign(const long_uint_t<type_t, size>& value) noexcept;
+template<typename type_t, uint_t size>
+constexpr bool sign(const long_int_t<type_t, size>& value) noexcept;
+
 // calculate leading zero bits
 
 template<typename type_t, uint_t size>
@@ -117,6 +153,11 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
 
 template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> divr(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, std::optional<long_uint_t<type_t, size>>& remainder) noexcept;
+
+// negate vector
+
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
+constexpr void negate(type_t& value) noexcept;
 
 // add two vectors
 
@@ -171,7 +212,7 @@ constexpr long_uint_t<type_t, size / 2> half_hi(const long_uint_t<type_t, size>&
 
     for (uint_t n = 0; n < half_size; n++)
         result.digits[n] = value.digits[n + half_size];
-  
+
     return result;
 }
 
@@ -227,6 +268,26 @@ constexpr long_uint_t<type_t, size> half_make_hi(const long_uint_t<type_t, size>
         result.digits[n] = value.digits[n - half_size];
 
     return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool sign(const long_uint_t<type_t, size>& value) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    return make_signed_t<long_uint_t>(value.digits[long_uint_t::hi]) < 0;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool sign(const long_int_t<type_t, size>& value) noexcept
+{
+    return value.sign();
 }
 
 
@@ -294,7 +355,7 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
 {
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
-    
+
     half_uint_t value1_lo = half_lo(value1);
     half_uint_t value1_hi = half_hi(value1);
     const half_uint_t value2_lo = half_lo(value2);
@@ -304,12 +365,12 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
     half_uint_t t1_lo = value1_hi;
     half_uint_t t2_lo = value1_lo;
     half_uint_t t3_lo = value1_hi;
-    
+
     const half_uint_t t0_hi = mul(t0_lo, value2_lo);
     const half_uint_t t1_hi = mulc(t1_lo, value2_lo, t0_hi);
     const half_uint_t t2_hi = mulc(t2_lo, value2_hi, t1_lo);
     const half_uint_t t3_hi = mulc(t3_lo, value2_hi, t2_hi);
-    
+
     value1_lo = t0_lo;
     value1_hi = t2_lo;
 
@@ -384,10 +445,27 @@ constexpr long_uint_t<type_t, size> divr(const long_uint_t<type_t, size>& value1
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void negate(type_t& value) noexcept
+{
+    using value_t = typename type_t::value_type;
+
+    bool borrow = true;
+
+    for (uint_t n = 0; n < std::size(value); ++n) {
+
+        borrow = subb(value[n], value_t(0), borrow);
+        value[n] = ~value[n];
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
 constexpr void add(type_t& value1, const type_t& value2) noexcept
 {
     bool carry = add(value1[0], value2[0]);
-    
+
     for (uint_t n = 1; n < std::size(value1); ++n)
         carry = addc(value1[n], value2[n], carry);
 }

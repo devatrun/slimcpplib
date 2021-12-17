@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.0
+// version 1.3
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -103,6 +103,19 @@ using make_unsigned_t = typename make_unsigned<type_t>::type;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// make_signed_t
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename type_t>
+struct make_signed {
+    using type = typename std::make_signed<type_t>::type;
+};
+template<typename type_t>
+using make_signed_t = typename make_signed<type_t>::type;
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // half_t
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -140,6 +153,11 @@ constexpr type_t half_hi(type_t value) noexcept;
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t half_make_hi(type_t value) noexcept;
+
+// return most significant bit
+
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+constexpr bool sign(type_t value);
 
 // propagate most significant bit to the right
 
@@ -241,6 +259,15 @@ template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t half_make_hi(type_t value) noexcept
 {
     return value << (bit_count_v<type_t> / 2);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int>>
+constexpr bool sign(type_t value)
+{
+    return make_signed_t<type_t>(value) < 0;
 }
 
 

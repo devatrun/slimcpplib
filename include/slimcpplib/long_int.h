@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.0
+// version 1.3
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -119,17 +119,6 @@ inline constexpr bool is_signed_v<long_int_t<native_t, size>> = true;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// make_unsigned_t
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<typename native_t, uint_t size>
-struct make_unsigned<long_int_t<native_t, size>> {
-    using type = long_uint_t<native_t, size>;
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -217,17 +206,10 @@ constexpr bool long_int_t<native_t, size>::sign() const noexcept
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::negate() noexcept
 {
-    bool borrow = true;
-
-    for (uint_t n = 0; n < std::size(digits); ++n) {
-
-        borrow = subb<native_t>(digits[n], 0, borrow);
-        digits[n] = ~digits[n];
-    }
+    slim::negate(digits);
 
     return *this;
 }
-
 
 
 
@@ -398,10 +380,7 @@ constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator-() con
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator*=(const long_int_t& that) noexcept
 {
-    long_uint_t<native_t, size>::operator*=(that.sign() ? -that : that);
-
-    if (that.sign())
-        negate();
+    long_uint_t<native_t, size>::operator*=(that);
 
     return *this;
 }
@@ -421,15 +400,15 @@ constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator*(const
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator/=(const long_int_t& that) noexcept
 {
-    const long_uint_t<native_t, size> value1 = this->sign() ? -*this : *this;
-    const long_uint_t<native_t, size> value2 = that.sign() ? -that : that;
+    const bool sing = sign();
 
-    long_uint_t<native_t, size> result = value1 / value2;
+    if (sing)
+        negate();
 
-    if (this->sign() ^ that.sign())
-        result = -result;
+    long_uint_t<native_t, size>::operator/=(that.sign() ? -that : that);
 
-    *this = result;
+    if (sing != that.sign())
+        negate();
 
     return *this;
 }
@@ -449,15 +428,15 @@ constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator/(const
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator%=(const long_int_t& that) noexcept
 {
-    const long_uint_t<native_t, size> value1 = this->sign() ? -*this : *this;
-    const long_uint_t<native_t, size> value2 = that.sign() ? -that : that;
+    const bool sing = sign();
 
-    long_uint_t<native_t, size> result = value1 % value2;
+    if (sing)
+        negate();
 
-    if (this->sign() ^ that.sign())
-        result = -result;
+    long_uint_t<native_t, size>::operator%=(that.sign() ? -that : that);
 
-    *this = result;
+    if (sing != that.sign())
+        negate();
 
     return *this;
 }
@@ -538,13 +517,18 @@ template<typename type_t, std::enable_if_t<is_signed_v<type_t>, int>>
 constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const type_t& divider) noexcept
 {
     using unsigned_t = make_unsigned_t<type_t>;
-    const unsigned_t uvalue = value >= 0 ? value : -value;
-    const unsigned_t umultiplier = multiplier >= 0 ? multiplier : -multiplier;
-    const unsigned_t udivider = divider >= 0 ? divider : -divider;
+
+    const bool value_sign = sign(value);
+    const bool multiplier_sign = sign(multiplier);
+    const bool divider_sign = sign(divider);
+
+    const unsigned_t uvalue = value_sign ? -value : value;
+    const unsigned_t umultiplier = multiplier_sign ? -multiplier : multiplier;
+    const unsigned_t udivider = divider_sign ? -divider : divider;
 
     type_t result = muldiv<unsigned_t>(uvalue, umultiplier, udivider);
 
-    if ((value < 0) ^ (multiplier < 0) ^ (divider < 0))
+    if (value_sign != multiplier_sign != divider_sign)
         result = -result;
 
     return result;

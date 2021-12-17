@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.0
+// version 1.3
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -82,7 +82,7 @@ private:
 template<typename type_t>
 constexpr long_fixed_divider<type_t> make_fixed_divider(const type_t value) noexcept;
 template<typename type_t>
-constexpr type_t operator/(const type_t& dividend, const long_fixed_divider<type_t>& divider) noexcept;
+constexpr type_t operator/(type_t dividend, const long_fixed_divider<type_t>& divider) noexcept;
 
 
 
@@ -204,7 +204,7 @@ constexpr long_fixed_divider<type_t> make_fixed_divider(const type_t value) noex
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t>
-constexpr type_t operator/(const type_t& dividend, const long_fixed_divider<type_t>& divider) noexcept
+constexpr type_t operator/(type_t dividend, const long_fixed_divider<type_t>& divider) noexcept
 {
     return divider.divide(dividend);
 }
