@@ -95,6 +95,7 @@ public:
     constexpr long_int_t operator+(const long_int_t& that) const noexcept;
     constexpr long_int_t& operator++() noexcept;
     constexpr long_int_t operator++(int) noexcept;
+    constexpr long_int_t operator+() const noexcept;
     constexpr long_int_t& operator-=(const long_int_t& that) noexcept;
     constexpr long_int_t operator-(const long_int_t& that) const noexcept;
     constexpr long_int_t& operator--() noexcept;
@@ -323,6 +324,15 @@ template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator++(int) noexcept
 {
     return long_int_t(long_uint_t<native_t, size>::operator++(0));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator+() const noexcept
+{
+    return *this;
 }
 
 
