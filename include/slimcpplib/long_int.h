@@ -197,7 +197,7 @@ constexpr void long_int_t<native_t, size>::swap(long_int_t& that) noexcept
 template<typename native_t, uint_t size>
 constexpr bool long_int_t<native_t, size>::sign() const noexcept
 {
-    return std::make_signed_t<native_t>(digits[hi]) < 0;
+    return make_signed_t<native_t>(digits[hi]) < 0;
 }
 
 
