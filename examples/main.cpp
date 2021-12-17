@@ -65,8 +65,7 @@ static void initalization_and_conversion() noexcept
     // construct long integer
 
     uint128_t u1; // can't be used as constant expressions
-    u1 = 0;
-    assert(u1 == 0);
+    assert(u1 == u1);
 
 
     // construct long integer from unsigned integer value
