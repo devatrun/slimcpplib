@@ -90,3 +90,5 @@ std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";      
 * Although all methods and functions are defined using the constexpr qualifier, due to the limitations of C++ 17, working completely at compile time is only possible for code without instrinsics, since there is no implementation of [std::is_constant_evaluated()](https://en.cppreference.com/w/cpp/types/is_constant_evaluated) in the standard before C++ 20.
 * The design of long integers tries to completely repeat the behavior of native integers, but still differs. For example, the propagation of integer types always occurs from a signed integer to an unsigned integer, and an implicit conversion from a larger integer to a smaller integer does not cause a warning, but a compilation error.
 * Location of digits always corresponds to little-endian, regardless of the platform, which should be taken into account when serialization/deserialization. The digits themselves are always in platform natural order.
+## Examples
+[main.cpp](examples/main.cpp) - examples of using the main interface of the library with comments.
