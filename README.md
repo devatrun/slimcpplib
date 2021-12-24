@@ -92,3 +92,17 @@ std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";      
 * Location of digits always corresponds to little-endian, regardless of the platform, which should be taken into account when serialization/deserialization. The digits themselves are always in platform natural order.
 ## Examples
 [main.cpp](examples/main.cpp) - examples of using the main interface of the library with comments.
+## Performance
+All measurements are not intended to be a strong performance tests and are provided simply for relative comparison of the operation costs. All measurements were taken on Intel (R) Core (TM) i5-9400F CPU @ 2.90GHz in a 64-bit configuration with 128-bit integers.
+| Operation  | Average time (in ns.)  |
+|--:|---|
+| Unsigned addition | 0.25 |
+| Signed addition  | 0.25 |
+| Unsigned subtraction | 0.25 |
+| Signed subtraction | 0.25 |
+| Unsigned multiplication | 7.00 |
+| Signed multiplication | 7.00 |
+| Unsigned division | 15.00 |
+| Signed division | 20.00 |
+| Unsigned muldiv() | 20.00 |
+| Signed muldiv() | 25.00 |
