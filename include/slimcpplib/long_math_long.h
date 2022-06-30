@@ -53,8 +53,181 @@ class long_uint_t;
 template<typename type_t, uint_t size>
 class long_int_t;
 
+} // namespace slim
+
+namespace std
+{
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// class numeric_limits<slim::long_uint_t<type_t, size>>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, size_t size>
+struct numeric_limits<slim::long_uint_t<type_t, size>> {
+public:
+
+    using long_uint_t = slim::long_uint_t<type_t, size>;
+
+    static const bool is_specialized = true;
+    static const bool is_signed = false;
+    static const bool is_integer = true;
+    static const bool is_exact = true;
+
+    static const bool has_infinity = false;
+    static const bool has_quiet_NaN = false;
+    static const bool has_signaling_NaN = false;
+    static const float_denorm_style has_denorm = denorm_absent;
+    static const bool has_denorm_loss = false;
+    static const float_round_style round_style = round_toward_zero;
+
+    static const bool is_iec559 = false;
+    static const bool is_bounded = false;
+    static const bool is_modulo = false;
+
+    static const int digits = 0;
+    static const int digits10 = 0;
+    static const int radix = 2;
+
+    static const int min_exponent = 0;
+    static const int min_exponent10 = 0;
+    static const int max_exponent = 0;
+    static const int max_exponent10 = 0;
+
+    static const bool traps = false;
+    static const bool tinyness_before = false;
+
+    static long_uint_t min() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static constexpr long_uint_t lowest() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t max() noexcept
+    {
+        return long_uint_t(-1);
+    }
+
+    static long_uint_t epsilon() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t round_error() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t infinity() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t quiet_NaN() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t signaling_NaN() noexcept
+    {
+        return long_uint_t(0);
+    }
+
+    static long_uint_t denorm_min() noexcept
+    {
+        return long_uint_t(0);
+    }
+};
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// class numeric_limits<slim::long_int_t<type_t, size>>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, size_t size>
+struct numeric_limits<slim::long_int_t<type_t, size>> {
+public:
+    using long_int_t = slim::long_int_t<type_t, size>;
+
+    static const bool is_specialized = true;
+    static const bool is_signed = true;
+    static const bool is_integer = true;
+    static const bool is_exact = true;
+
+    static const bool has_infinity = false;
+    static const bool has_quiet_NaN = false;
+    static const bool has_signaling_NaN = false;
+    static const float_denorm_style has_denorm = denorm_absent;
+    static const bool has_denorm_loss = false;
+    static const float_round_style round_style = round_toward_zero;
+
+    static const bool is_iec559 = false;
+    static const bool is_bounded = false;
+    static const bool is_modulo = false;
+
+    static const int digits = 0;
+    static const int digits10 = 0;
+    static const int radix = 2;
+
+    static const int min_exponent = 0;
+    static const int min_exponent10 = 0;
+    static const int max_exponent = 0;
+    static const int max_exponent10 = 0;
+
+    static const bool traps = false;
+    static const bool tinyness_before = false;
+
+    static long_int_t min() noexcept
+    {
+        return slim::long_uint_t<type_t, size>(1) << (slim::bit_count_v<long_int_t> - 1);
+    }
+
+    static constexpr long_int_t lowest() noexcept
+    {
+        return min();
+    }
+
+    static long_int_t max() noexcept
+    {
+        return ~slim::long_uint_t<type_t, size>(min());
+    }
+
+    static long_int_t epsilon() noexcept
+    {
+        return long_int_t(0);
+    }
+
+    static long_int_t round_error() noexcept
+    {
+        return long_int_t(0);
+    }
+
+    static long_int_t infinity() noexcept
+    {
+        return long_int_t(0);
+    }
+
+    static long_int_t quiet_NaN() noexcept
+    {
+        return long_int_t(0);
+    }
+
+    static long_int_t signaling_NaN() noexcept
+    {
+        return long_int_t(0);
+    }
+
+    static long_int_t denorm_min() noexcept
+    {
+        return long_int_t(0);
+    }
+};
+
+} // namespace std
+
+namespace slim
+{
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // make_unsigned_t
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -50,8 +50,8 @@ namespace slim
 // type definitions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-using uint_t = uintptr_t;
-using int_t = intptr_t;
+using uint_t = std::uintptr_t;
+using int_t = std::intptr_t;
 
 
 
@@ -71,9 +71,10 @@ constexpr uint_t bit_count_v = byte_count_v<type_t>* CHAR_BIT;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-inline constexpr bool is_unsigned_v = std::is_unsigned_v<type_t>;
+inline constexpr bool is_unsigned_v = std::numeric_limits<type_t>::is_integer && !std::numeric_limits<type_t>::is_signed;
 template<typename type_t>
-inline constexpr bool is_signed_v = std::is_signed_v<type_t>;
+inline constexpr bool is_signed_v = std::numeric_limits<type_t>::is_integer && std::numeric_limits<type_t>::is_signed;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,9 +84,9 @@ inline constexpr bool is_signed_v = std::is_signed_v<type_t>;
 template<typename type_t>
 inline constexpr bool is_unsigned_array_v = false;
 template<typename type_t, uint_t size>
-inline constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t> && true;
+inline constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t>;
 template<typename type_t, uint_t size>
-inline constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t> && true;
+inline constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t>;
 
 
 

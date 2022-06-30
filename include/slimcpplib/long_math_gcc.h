@@ -126,7 +126,8 @@ inline uint_t popcnt(uint64_t value) noexcept
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint_t nlz(uint8_t value) noexcept
 {
-    return value ? __builtin_clz(value) : bit_count_v<uint8_t>;
+    constexpr uint_t offset = bit_count_v<decltype(__builtin_clz(value))> - bit_count_v<uint8_t>;
+    return value ? __builtin_clz(value) - offset : bit_count_v<uint8_t>;
 }
 
 
@@ -134,7 +135,8 @@ inline uint_t nlz(uint8_t value) noexcept
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 inline uint_t nlz(uint16_t value) noexcept
 {
-    return value ? __builtin_clz(value) : bit_count_v<uint16_t>;
+    constexpr uint_t offset = bit_count_v<decltype(__builtin_clz(value))> - bit_count_v<uint16_t>;
+    return value ? __builtin_clz(value) - offset : bit_count_v<uint16_t>;
 }
 
 
@@ -151,7 +153,7 @@ inline uint_t nlz(uint32_t value) noexcept
 inline uint_t nlz(uint64_t value) noexcept
 {
 #ifdef __x86_64__
-    return value ? __builtin_clz(value) : bit_count_v<uint64_t>;
+    return value ? __builtin_clzl(value) : bit_count_v<uint64_t>;
 #else
     const uint32_t value_hi = static_cast<uint32_t>(half_hi(value));
     const uint32_t value_lo = static_cast<uint32_t>(half_lo(value));

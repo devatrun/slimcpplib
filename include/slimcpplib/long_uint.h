@@ -52,7 +52,7 @@ public:
 
     using native_array_t = std::array<native_t, size>;
 
-    static_assert(is_unsigned_v<native_t>, "unsigned long integer native type must be unsigned.");
+    static_assert(std::is_unsigned_v<native_t>, "unsigned long integer native type must be unsigned.");
     static_assert(size >= 2, "native array size must be 2 or bigger.");
     static_assert((size & (size - 1)) == 0, "native array size must be power of 2.");
 
@@ -123,14 +123,6 @@ public:
 
     native_array_t digits;
 };
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// is_unsigned_v
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename native_t, uint_t size>
-inline constexpr bool is_unsigned_v<long_uint_t<native_t, size>> = true;
 
 
 
@@ -650,7 +642,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator%(con
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator==(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) == value2;
@@ -659,7 +651,7 @@ constexpr bool operator==(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator!=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) != value2;
@@ -668,7 +660,7 @@ constexpr bool operator!=(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator<(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) < value2;
@@ -677,7 +669,7 @@ constexpr bool operator<(type_t value1, const long_uint_t<native_t, size>& value
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator<=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) <= value2;
@@ -686,7 +678,7 @@ constexpr bool operator<=(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator>(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) > value2;
@@ -695,7 +687,7 @@ constexpr bool operator>(type_t value1, const long_uint_t<native_t, size>& value
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_unsigned_v<type_t> || std::is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr bool operator>=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) >= value2;
@@ -704,7 +696,7 @@ constexpr bool operator>=(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator&(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) &= value2;
@@ -713,7 +705,7 @@ constexpr long_uint_t<native_t, size> operator&(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator|(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) |= value2;
@@ -722,7 +714,7 @@ constexpr long_uint_t<native_t, size> operator|(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator^(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) ^= value2;
@@ -749,7 +741,7 @@ constexpr long_uint_t<native_t, size> operator>>(long_uint_t<native_t, size> val
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator+(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) += value2;
@@ -758,7 +750,7 @@ constexpr long_uint_t<native_t, size> operator+(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator-(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) -= value2;
@@ -767,7 +759,7 @@ constexpr long_uint_t<native_t, size> operator-(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator*(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) *= value2;
@@ -776,7 +768,7 @@ constexpr long_uint_t<native_t, size> operator*(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator/(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) /= value2;
@@ -785,7 +777,7 @@ constexpr long_uint_t<native_t, size> operator/(type_t value1, const long_uint_t
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator%(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) %= value2;
@@ -827,7 +819,7 @@ constexpr uint8_t kSeparator = 0xff;
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int> = 0>
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t mulc_costexpr(const type_t& value1, const type_t& value2, type_t& carry) noexcept
 {
     const type_t value1_lo = half_lo(value1);

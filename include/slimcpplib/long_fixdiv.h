@@ -112,27 +112,6 @@ constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& multiplie
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // public methods
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr uint_t nlz_costexpr(type_t value) noexcept
-{
-    type_t mask = ~type_t(0) ^ ((~type_t(0)) / 2);
-    uint_t count = 0;
-
-    for (uint_t n = 0; n < bit_count_v<type_t>; ++n) {
-
-        if ((value & mask) != 0)
-            break;
-
-        mask /= 2;
-        ++count;
-    }
-
-    return count;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t>
 constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const type_t& divider) noexcept
 {
