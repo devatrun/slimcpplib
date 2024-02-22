@@ -294,7 +294,7 @@ constexpr type_t half_hi(const long_uint_t<type_t, 2>& value) noexcept;
 // make unsigned integer from low and high
 
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_make(const long_uint_t<type_t, size / 2>& high, const long_uint_t<type_t, size / 2>& low) noexcept;
+constexpr long_uint_t<type_t, size * 2> half_make(const long_uint_t<type_t, size>& high, const long_uint_t<type_t, size>& low) noexcept;
 template<typename type_t>
 constexpr long_uint_t<type_t, 2> half_make(const type_t& high, const type_t& low) noexcept;
 
@@ -402,15 +402,15 @@ constexpr type_t half_hi(const long_uint_t<type_t, 2>& value) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> half_make(const long_uint_t<type_t, size / 2>& value_hi, const long_uint_t<type_t, size / 2>& value_lo) noexcept
+constexpr long_uint_t<type_t, size * 2> half_make(const long_uint_t<type_t, size>& value_hi, const long_uint_t<type_t, size>& value_lo) noexcept
 {
-    constexpr uint_t half_size = size / 2;
-    long_uint_t<type_t, half_size> result;
+    constexpr uint_t double_size = size * 2;
+    long_uint_t<type_t, double_size> result;
 
-    for (uint_t n = 0; n < half_size; n++)
+    for (uint_t n = 0; n < size; n++)
         result.digits[n] = value_lo.digits[n];
-    for (uint_t n = half_size; n < size; n++)
-        result.digits[n] = value_hi.digits[n - half_size];
+    for (uint_t n = size; n < double_size; n++)
+        result.digits[n] = value_hi.digits[n - size];
 
     return result;
 }
