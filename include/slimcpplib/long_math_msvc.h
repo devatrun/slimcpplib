@@ -1,5 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 // Simple Long Integer Math for C++
 // version 1.3
 //
@@ -31,12 +30,20 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-
 #include "long_math.h"
 
 #if defined(_MSC_VER)
+    #include <immintrin.h>
+    #include <intrin.h>
 
-#include <intrin.h>
+    #if defined(__clang__)
+        extern "C" {
+            unsigned char _addcarry_u8(unsigned char, unsigned char, unsigned char, unsigned char*);
+            unsigned char _addcarry_u16(unsigned char, unsigned short, unsigned short, unsigned short*);
+            unsigned char _subborrow_u8(unsigned char, unsigned char, unsigned char, unsigned char*);
+            unsigned char _subborrow_u16(unsigned char, unsigned short, unsigned short, unsigned short*);
+        }
+    #endif
 
 namespace slim
 {
