@@ -25,25 +25,6 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-using native_word_t = typename uint_t::native_array_t::value_type;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-constexpr size_t word_bits = sizeof(native_word_t<uint_t>) * 8;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-constexpr size_t word_count = std::tuple_size<typename uint_t::native_array_t>::value;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t>
 void run_unsigned_128_overflow_wraparound_tests()
 {
@@ -76,6 +57,7 @@ void run_unsigned_256_overflow_wraparound_tests()
 
     constexpr uint_t all_ones = uint_t(-1);
     static_assert(all_ones + 1 == 0);
+
     ASSERT_EQ(uint_max_r + 1, uint_t(0));
 
     // partial carry: only words 0 and 1 are at maximum
@@ -156,6 +138,7 @@ void run_128_boundary_value_tests()
     static_assert(int_min < int_t(0));
     static_assert(int_t(0) < int_max);
     static_assert(int_min < int_max);
+
     ASSERT_LT(uint_t(0), uint_max_r);
     ASSERT_LT(int_min_r, int_t(0));
     ASSERT_LT(int_t(0), int_max_r);
@@ -164,8 +147,9 @@ void run_128_boundary_value_tests()
     // incrementing and decrementing around boundaries
 
     static_assert(++uint_t(uint_max) == 0);
-    ASSERT_EQ(++uint_t(uint_max_r), uint_t(0));
     static_assert(--int_t(int_min) == int_max);
+
+    ASSERT_EQ(++uint_t(uint_max_r), uint_t(0));
     ASSERT_EQ(--int_t(int_min_r), int_max_r);
 
     // maximum value as arithmetic operand
@@ -174,6 +158,7 @@ void run_128_boundary_value_tests()
     static_assert(uint_max / uint_max == 1);
     static_assert(uint_max % uint_max == 0);
     static_assert(uint_max - uint_max == 0);
+
     ASSERT_EQ(uint_max_r * 1, uint_max_r);
     ASSERT_EQ(uint_max_r / uint_max_r, uint_t(1));
     ASSERT_EQ(uint_max_r % uint_max_r, uint_t(0));

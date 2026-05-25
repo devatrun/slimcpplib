@@ -24,17 +24,17 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t, typename int_t>
 void run_128_mixed_type_operation_tests()
 {
     constexpr uint_t uint_hundred = 100;
+    const uint_t uint_hundred_r = 100;
 
     // commutativity of addition with native int
 
     static_assert(uint_hundred + 1 == 1 + uint_hundred);
     static_assert(uint_hundred + 50 == 50 + uint_hundred);
-    const uint_t uint_hundred_r = 100;
+
     ASSERT_EQ(uint_hundred_r + 1, 1 + uint_hundred_r);
     ASSERT_EQ(uint_hundred_r + 50, 50 + uint_hundred_r);
 
@@ -42,8 +42,9 @@ void run_128_mixed_type_operation_tests()
     // uint_t(100) + int(-1) = 99 (int(-1) sign-extends to all-ones, then wraps)
 
     static_assert(uint_hundred + int(-1) == uint_t(99));
-    ASSERT_EQ(uint_hundred_r + int(-1), uint_t(99));
     static_assert(uint_hundred - int(-1) == uint_t(101));
+
+    ASSERT_EQ(uint_hundred_r + int(-1), uint_t(99));
     ASSERT_EQ(uint_hundred_r - int(-1), uint_t(101));
 
     // comparison: native int on left-hand side
@@ -64,30 +65,33 @@ void run_128_mixed_type_operation_tests()
     // arithmetic: native int on left-hand side
 
     static_assert(100 / uint_t(10) == uint_t(10));
-    ASSERT_EQ(100 / uint_t(10), uint_t(10));
     static_assert(7 / uint_t(3) == uint_t(2));
-    ASSERT_EQ(7 / uint_t(3), uint_t(2));
     static_assert(0 / uint_t(99) == uint_t(0));
-    ASSERT_EQ(0 / uint_t(99), uint_t(0));
     static_assert(100 % uint_t(7) == uint_t(2));
+
+    ASSERT_EQ(100 / uint_t(10), uint_t(10));
+    ASSERT_EQ(7 / uint_t(3), uint_t(2));
+    ASSERT_EQ(0 / uint_t(99), uint_t(0));
     ASSERT_EQ(100 % uint_t(7), uint_t(2));
 
     // signed mixed operations
 
     static_assert(int_t(10) + 5 == int_t(15));
-    ASSERT_EQ(int_t(10) + 5, int_t(15));
     static_assert(5 + int_t(10) == int_t(15));
-    ASSERT_EQ(5 + int_t(10), int_t(15));
     static_assert(int_t(10) - 15 == int_t(-5));
-    ASSERT_EQ(int_t(10) - 15, int_t(-5));
     static_assert(20 - int_t(15) == int_t(5));
+
+    ASSERT_EQ(int_t(10) + 5, int_t(15));
+    ASSERT_EQ(5 + int_t(10), int_t(15));
+    ASSERT_EQ(int_t(10) - 15, int_t(-5));
     ASSERT_EQ(20 - int_t(15), int_t(5));
 
     // multiplication with native type
 
     static_assert(int_t(-7) * 3 == int_t(-21));
-    ASSERT_EQ(int_t(-7) * 3, int_t(-21));
     static_assert(3 * int_t(-7) == int_t(-21));
+
+    ASSERT_EQ(int_t(-7) * 3, int_t(-21));
     ASSERT_EQ(3 * int_t(-7), int_t(-21));
 }
 

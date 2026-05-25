@@ -25,19 +25,6 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-using native_word_t = typename uint_t::native_array_t::value_type;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-constexpr size_t word_bits = sizeof(native_word_t<uint_t>) * 8;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t>
 void run_128_multiplication_edge_case_tests()
 {
@@ -56,6 +43,7 @@ void run_128_multiplication_edge_case_tests()
 
     static_assert(large * 1 == large);
     static_assert(1 * large == large);
+
     ASSERT_EQ(large_r * 1, large_r);
     ASSERT_EQ(uint_t(1) * large_r, large_r);
 
@@ -70,13 +58,14 @@ void run_128_multiplication_edge_case_tests()
     // multiplication by powers of two
 
     constexpr uint_t shift_equiv_val = (uint_t(1) << word_bits<uint_t>) + uint_t(1);
+    constexpr uint_t factor = uint_t(1) << word_bits<uint_t>;
+
     static_assert(shift_equiv_val * 2 == (shift_equiv_val << 1));
     static_assert(shift_equiv_val * 256 == (shift_equiv_val << 8));
+    static_assert(shift_equiv_val * factor == (shift_equiv_val << word_bits<uint_t>));
+
     ASSERT_EQ(shift_equiv_val * 2, shift_equiv_val << 1);
     ASSERT_EQ(shift_equiv_val * 256, shift_equiv_val << 8);
-
-    constexpr uint_t factor = uint_t(1) << word_bits<uint_t>;
-    static_assert(shift_equiv_val * factor == (shift_equiv_val << word_bits<uint_t>));
     ASSERT_EQ(shift_equiv_val * factor, shift_equiv_val << word_bits<uint_t>);
 }
 
@@ -122,12 +111,13 @@ void run_256_multiplication_edge_case_tests()
 template<typename uint_t>
 void run_128_division_edge_case_tests()
 {
-    constexpr uint_t nontrivial = (uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull);
-
     // 0 / x == 0, 0 % x == 0
+
+    constexpr uint_t nontrivial = (uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull);
 
     static_assert(uint_t(0) / nontrivial == 0);
     static_assert(uint_t(0) % nontrivial == 0);
+
     ASSERT_EQ(uint_t(0) / nontrivial, uint_t(0));
     ASSERT_EQ(uint_t(0) % nontrivial, uint_t(0));
 
@@ -135,14 +125,17 @@ void run_128_division_edge_case_tests()
 
     static_assert(nontrivial / nontrivial == 1);
     static_assert(nontrivial % nontrivial == 0);
+
     ASSERT_EQ(nontrivial / nontrivial, uint_t(1));
     ASSERT_EQ(nontrivial % nontrivial, uint_t(0));
 
     // x / (x+1) == 0, x % (x+1) == x
 
     constexpr uint_t small = 5;
+
     static_assert(small / nontrivial == 0);
     static_assert(small % nontrivial == small);
+
     ASSERT_EQ(small / nontrivial, uint_t(0));
     ASSERT_EQ(small % nontrivial, small);
 
@@ -150,8 +143,10 @@ void run_128_division_edge_case_tests()
 
     constexpr uint_t two_word_divisor = (uint_t(1) << word_bits<uint_t>) + uint_t(1);
     constexpr uint_t two_word_dividend = two_word_divisor * 2;
+
     static_assert(two_word_dividend / two_word_divisor == 2);
     static_assert(two_word_dividend % two_word_divisor == 0);
+
     ASSERT_EQ(two_word_dividend / two_word_divisor, uint_t(2));
     ASSERT_EQ(two_word_dividend % two_word_divisor, uint_t(0));
 }
@@ -167,8 +162,10 @@ void run_256_division_edge_case_tests()
     constexpr uint_t divisor_3 = uint_t(3);
     constexpr uint_t two_pow_word = uint_t(1) << word_bits<uint_t>;
     constexpr native_word_t<uint_t> expected_quotient = native_word_t<uint_t>(-1) / 3;
+
     static_assert(two_pow_word / divisor_3 == uint_t(expected_quotient));
     static_assert(two_pow_word % divisor_3 == uint_t(1));
+
     ASSERT_EQ(two_pow_word / divisor_3, uint_t(expected_quotient));
     ASSERT_EQ(two_pow_word % divisor_3, uint_t(1));
 }
@@ -198,13 +195,14 @@ void run_128_signed_division_edge_case_tests()
 template<typename uint_t>
 void run_128_modulo_edge_case_tests()
 {
-    constexpr uint_t modulus = (uint_t(0xfedcba9876543211ull) << 0);
-
     // basic identities
+
+    constexpr uint_t modulus = (uint_t(0xfedcba9876543211ull) << 0);
 
     static_assert(uint_t(0) % modulus == 0);
     static_assert(modulus % modulus == 0);
     static_assert((modulus - 1) % modulus == modulus - 1);
+
     ASSERT_EQ(uint_t(0) % modulus, uint_t(0));
     ASSERT_EQ(modulus % modulus, uint_t(0));
     ASSERT_EQ((modulus - 1) % modulus, modulus - 1);
@@ -212,8 +210,10 @@ void run_128_modulo_edge_case_tests()
     // modulo by power of 2
 
     constexpr uint_t dividend = uint_t(0x123456789abcdef0ull);
+
     static_assert(dividend % 256 == (dividend & 255));
     static_assert(dividend % 256 == uint_t(0xf0));
+
     ASSERT_EQ(dividend % 256, dividend & 255);
     ASSERT_EQ(dividend % 256, uint_t(0xf0));
 
@@ -255,10 +255,14 @@ void run_128_signed_modulo_edge_case_tests()
 template<typename uint_t, typename int_t>
 void run_128_muldiv_extended_tests()
 {
-    // muldiv(a, b, b) == a
-
     constexpr uint_t uint_val = (uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull);
     constexpr uint_t uint_divisor = uint_t(0xfedcba9876543210ull);
+    constexpr uint_t small = 100;
+    constexpr int_t sint_val = -int_t((uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull));
+    constexpr int_t sint_divisor = int_t(0xfedcba9876543210ull);
+
+    // muldiv(a, b, b) == a
+
     ASSERT_EQ(muldiv(uint_val, uint_divisor, uint_divisor), uint_val);
 
     // muldiv(a, 1, 1) == a
@@ -267,13 +271,10 @@ void run_128_muldiv_extended_tests()
 
     // muldiv(a, b, 1) == a * b for small a
 
-    constexpr uint_t small = 100;
     ASSERT_EQ(muldiv(small, uint_t(7), uint_t(7)), small);
 
     // signed muldiv
 
-    constexpr int_t sint_val = -int_t((uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull));
-    constexpr int_t sint_divisor = int_t(0xfedcba9876543210ull);
     ASSERT_EQ(muldiv(sint_val, sint_divisor, sint_divisor), sint_val);
 }
 
@@ -287,8 +288,10 @@ void run_128_arithmetic_invariant_tests()
 
     constexpr uint_t ua = (uint_t(0x1234567890abcdefull) << 64) + uint_t(0xfedcba9876543210ull);
     constexpr uint_t ub = (uint_t(0x0fedcba987654321ull) << 64) + uint_t(0x0123456789abcdefull);
+
     static_assert((ua + ub) - ub == ua);
     static_assert((ua - ub) + ub == ua);
+
     ASSERT_EQ((ua + ub) - ub, ua);
     ASSERT_EQ((ua - ub) + ub, ua);
 
@@ -296,8 +299,10 @@ void run_128_arithmetic_invariant_tests()
 
     constexpr int_t sa = -int_t(0x1234567890abcdefull);
     constexpr int_t sb = int_t(0x13579bdf2468ace0ull);
+
     static_assert((sa + sb) - sb == sa);
     static_assert((sa - sb) + sb == sa);
+
     ASSERT_EQ((sa + sb) - sb, sa);
     ASSERT_EQ((sa - sb) + sb, sa);
 
@@ -307,8 +312,10 @@ void run_128_arithmetic_invariant_tests()
     constexpr uint_t divisor = uint_t(0xfedcba9876543211ull);
     constexpr uint_t quotient = dividend / divisor;
     constexpr uint_t remainder = dividend % divisor;
+
     static_assert(quotient * divisor + remainder == dividend);
     static_assert(remainder < divisor);
+
     ASSERT_EQ(quotient * divisor + remainder, dividend);
     ASSERT_LT(remainder, divisor);
 
@@ -318,15 +325,18 @@ void run_128_arithmetic_invariant_tests()
     constexpr int_t signed_divisor = int_t(0x12345ull);
     constexpr int_t signed_quotient = signed_dividend / signed_divisor;
     constexpr int_t signed_remainder = signed_dividend % signed_divisor;
+
     static_assert(signed_quotient * signed_divisor + signed_remainder == signed_dividend);
     ASSERT_EQ(signed_quotient * signed_divisor + signed_remainder, signed_dividend);
 
     // multiplication by powers of two matches left shift
 
     constexpr uint_t shift_value = (uint_t(1) << 96) + (uint_t(1) << 64) + (uint_t(1) << 32) + uint_t(1);
+
     static_assert(shift_value * 2 == (shift_value << 1));
     static_assert(shift_value * 16 == (shift_value << 4));
     static_assert(shift_value * (uint_t(1) << 64) == (shift_value << 64));
+
     ASSERT_EQ(shift_value * 2, shift_value << 1);
     ASSERT_EQ(shift_value * 16, shift_value << 4);
     ASSERT_EQ(shift_value * (uint_t(1) << 64), shift_value << 64);
@@ -450,6 +460,8 @@ void run_compound_operator_consistency_tests()
     int_mod_assign %= int_divisor;
     ASSERT_EQ(int_mod_assign, int_left % int_divisor);
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // arithmetic_tests

@@ -21,35 +21,15 @@
 
 namespace slim
 {
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// standalone functions
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-using native_word_t = typename uint_t::native_array_t::value_type;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-constexpr size_t word_bits = sizeof(native_word_t<uint_t>) * 8;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-constexpr size_t word_count = std::tuple_size<typename uint_t::native_array_t>::value;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t>
 constexpr size_t total_bits = word_bits<uint_t> * word_count<uint_t>;
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// standalone functions
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template<typename uint_t, typename int_t>
 void run_128_compound_assignment_tests()
 {
@@ -95,6 +75,7 @@ void run_256_compound_assignment_tests()
     // &=, |=, ^= on 256-bit unsigned family
 
     constexpr uint_t pattern = uint_t(0xaaaaaaaaaaaaaaaaull);
+
     uint_t bitand_target = uint_t(-1);
     bitand_target &= pattern;
     ASSERT_EQ(bitand_target, pattern);
@@ -119,6 +100,7 @@ void run_128_bit_shift_edge_case_tests()
     constexpr uint_t shift_identity_val = (uint_t(native_word_t<uint_t>(0x12345678u)) << word_bits<uint_t>) + uint_t(native_word_t<uint_t>(0xdeadbeefu));
     static_assert((shift_identity_val << 0) == shift_identity_val);
     static_assert((shift_identity_val >> 0) == shift_identity_val);
+
     const uint_t shift_identity_val_r = shift_identity_val;
     ASSERT_EQ(shift_identity_val_r << 0, shift_identity_val_r);
     ASSERT_EQ(shift_identity_val_r >> 0, shift_identity_val_r);
@@ -129,6 +111,7 @@ void run_128_bit_shift_edge_case_tests()
     static_assert((one << word_bits<uint_t>).digits[0] == 0);
     static_assert((one << word_bits<uint_t>).digits[1] == 1);
     static_assert(((one << word_bits<uint_t>) >> word_bits<uint_t>) == 1);
+
     ASSERT_EQ((uint_t(1) << word_bits<uint_t>).digits[0], native_word_t<uint_t>(0));
     ASSERT_EQ((uint_t(1) << word_bits<uint_t>).digits[1], native_word_t<uint_t>(1));
     ASSERT_EQ((uint_t(1) << word_bits<uint_t>) >> word_bits<uint_t>, uint_t(1));
@@ -138,6 +121,7 @@ void run_128_bit_shift_edge_case_tests()
     static_assert((one << (total_bits<uint_t> - 1)).digits[0] == 0);
     static_assert((one << (total_bits<uint_t> - 1)).digits[word_count<uint_t> - 1] == (native_word_t<uint_t>(1) << (word_bits<uint_t> - 1)));
     static_assert(((one << (total_bits<uint_t> - 1)) >> (total_bits<uint_t> - 1)) == 1);
+
     ASSERT_EQ((uint_t(1) << (total_bits<uint_t> - 1)).digits[0], native_word_t<uint_t>(0));
     ASSERT_EQ((uint_t(1) << (total_bits<uint_t> - 1)).digits[word_count<uint_t> - 1], (native_word_t<uint_t>(1) << (word_bits<uint_t> - 1)));
     ASSERT_EQ((uint_t(1) << (total_bits<uint_t> - 1)) >> (total_bits<uint_t> - 1), uint_t(1));
@@ -146,6 +130,7 @@ void run_128_bit_shift_edge_case_tests()
 
     constexpr uint_t all_ones = uint_t(-1);
     static_assert((all_ones >> (total_bits<uint_t> - 1)) == 1);
+
     ASSERT_EQ(uint_t(-1) >> (total_bits<uint_t> - 1), uint_t(1));
 }
 
@@ -159,6 +144,7 @@ void run_128_signed_shift_tests()
 
     constexpr int_t neg_one = int_t(-1);
     static_assert((neg_one >> (total_bits<int_t> - 1)) == 1);
+
     ASSERT_EQ(int_t(-1) >> (total_bits<int_t> - 1), int_t(1));
 }
 
@@ -172,6 +158,7 @@ void run_256_signed_shift_tests()
 
     constexpr int_t neg_one = int_t(-1);
     static_assert((neg_one >> (total_bits<int_t> - 1)) == 1);
+
     ASSERT_EQ(int_t(-1) >> (total_bits<int_t> - 1), int_t(1));
 }
 
@@ -185,6 +172,7 @@ void run_256_bit_shift_edge_case_tests()
 
     static_assert((uint_t(0) << 200) == 0);
     static_assert((uint_t(0) >> 200) == 0);
+
     ASSERT_EQ(uint_t(0) << 200, uint_t(0));
     ASSERT_EQ(uint_t(0) >> 200, uint_t(0));
 
@@ -195,6 +183,7 @@ void run_256_bit_shift_edge_case_tests()
                   (one << word_bits<uint_t>).digits[2] == 0 && (one << word_bits<uint_t>).digits[3] == 0);
     static_assert((one << (2 * word_bits<uint_t>)).digits[2] == 1 && (one << (2 * word_bits<uint_t>)).digits[3] == 0);
     static_assert((one << (3 * word_bits<uint_t>)).digits[3] == 1);
+
     const uint_t one_r = 1;
     ASSERT_EQ((one_r << word_bits<uint_t>).digits[0], native_word_t<uint_t>(0));
     ASSERT_EQ((one_r << word_bits<uint_t>).digits[1], native_word_t<uint_t>(1));
@@ -209,6 +198,7 @@ void run_256_bit_shift_edge_case_tests()
     static_assert(((one << word_bits<uint_t>) >> word_bits<uint_t>) == 1);
     static_assert(((one << (2 * word_bits<uint_t>)) >> (2 * word_bits<uint_t>)) == 1);
     static_assert(((one << (3 * word_bits<uint_t>)) >> (3 * word_bits<uint_t>)) == 1);
+
     ASSERT_EQ((one_r << word_bits<uint_t>) >> word_bits<uint_t>, uint_t(1));
     ASSERT_EQ((one_r << (2 * word_bits<uint_t>)) >> (2 * word_bits<uint_t>), uint_t(1));
     ASSERT_EQ((one_r << (3 * word_bits<uint_t>)) >> (3 * word_bits<uint_t>), uint_t(1));
@@ -227,6 +217,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((word0_max + 1).digits[1] == 1);
     static_assert((word0_max + 1).digits[2] == 0);
     static_assert((word0_max + 1).digits[3] == 0);
+
     const uint_t word0_max_r = word0_max;
     ASSERT_EQ((word0_max_r + 1).digits[0], 0ull);
     ASSERT_EQ((word0_max_r + 1).digits[1], 1ull);
@@ -240,6 +231,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((words01_max + 1).digits[1] == 0);
     static_assert((words01_max + 1).digits[2] == 1);
     static_assert((words01_max + 1).digits[3] == 0);
+
     const uint_t words01_max_r = words01_max;
     ASSERT_EQ((words01_max_r + 1).digits[0], 0ull);
     ASSERT_EQ((words01_max_r + 1).digits[1], 0ull);
@@ -253,6 +245,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((word2_one - 1).digits[1] == native_word_t<uint_t>(-1));
     static_assert((word2_one - 1).digits[2] == 0);
     static_assert((word2_one - 1).digits[3] == 0);
+
     const uint_t word2_one_r = word2_one;
     ASSERT_EQ((word2_one_r - 1).digits[0], native_word_t<uint_t>(-1));
     ASSERT_EQ((word2_one_r - 1).digits[1], native_word_t<uint_t>(-1));
@@ -266,6 +259,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((word3_one - 1).digits[1] == native_word_t<uint_t>(-1));
     static_assert((word3_one - 1).digits[2] == native_word_t<uint_t>(-1));
     static_assert((word3_one - 1).digits[3] == 0);
+
     const uint_t word3_one_r = word3_one;
     ASSERT_EQ((word3_one_r - 1).digits[0], native_word_t<uint_t>(-1));
     ASSERT_EQ((word3_one_r - 1).digits[1], native_word_t<uint_t>(-1));
@@ -280,6 +274,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((word1_max + word1_one).digits[1] == 0);
     static_assert((word1_max + word1_one).digits[2] == 1);
     static_assert((word1_max + word1_one).digits[3] == 0);
+
     const uint_t word1_max_r = word1_max;
     const uint_t word1_one_r = word1_one;
     ASSERT_EQ((word1_max_r + word1_one_r).digits[0], 0ull);
@@ -294,6 +289,7 @@ void run_256_multiword_carry_borrow_tests()
     static_assert((mul_carry_base * 2).digits[1] == 1);
     static_assert((mul_carry_base * 2).digits[2] == 0);
     static_assert((mul_carry_base * 2).digits[3] == 0);
+
     const uint_t mul_carry_base_r = mul_carry_base;
     ASSERT_EQ((mul_carry_base_r * 2).digits[0], native_word_t<uint_t>(native_word_t<uint_t>(-1) - 1));
     ASSERT_EQ((mul_carry_base_r * 2).digits[1], 1ull);
@@ -397,6 +393,8 @@ void run_128_shift_at_or_beyond_width_noop_tests()
     ASSERT_EQ(int_value_r << (total_bits<int_t> + 17), int_value_r);
     ASSERT_EQ(int_value_r >> (total_bits<int_t> + 17), int_value_r);
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // compound_shift_tests

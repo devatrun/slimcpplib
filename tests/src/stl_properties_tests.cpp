@@ -33,16 +33,6 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t>
-using native_word_t = typename type_t::native_array_t::value_type;
-template<typename type_t>
-constexpr size_t word_bits = sizeof(native_word_t<type_t>) * 8;
-template<typename type_t>
-constexpr size_t word_count = std::tuple_size<typename type_t::native_array_t>::value;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, size_t expected_size>
 void run_size_and_alignment_tests()
 {
@@ -175,10 +165,14 @@ void run_256_digits_array_layout_tests()
 
     uint_t mutable_value = uint_t(0);
     mutable_value.digits[2] = 1;
+    
     size_t nonzero = 0;
-    for (size_t n = 0; n < std::size(mutable_value.digits); ++n)
+    for (size_t n = 0; n < std::size(mutable_value.digits); ++n) {
+
         if (mutable_value.digits[n] != 0)
             ++nonzero;
+    }
+
     ASSERT_EQ(nonzero, size_t(1));
 }
 
@@ -339,6 +333,7 @@ void run_unsigned_hash_tests()
     static_assert(std::hash<uint_t>()(small) == std::hash<uint_t>()(uint_t(0x12345u)));
     static_assert(std::hash<uint_t>()(multiword) == std::hash<uint_t>()((uint_t(0x0123456789abcdefull) << word_bits<uint_t>) + uint_t(0x0fedcba987654321ull)));
     static_assert(std::hash<uint_t>()(all_ones) == std::hash<uint_t>()(uint_t(-1)));
+
     ASSERT_EQ(hasher(zero), hasher(uint_t(0)));
     ASSERT_EQ(hasher(small), hasher(uint_t(0x12345u)));
     ASSERT_EQ(hasher(multiword), hasher((uint_t(0x0123456789abcdefull) << word_bits<uint_t>) + uint_t(0x0fedcba987654321ull)));
@@ -383,6 +378,7 @@ void run_signed_hash_tests()
     constexpr int_t positive = int_t(0x12345u);
     constexpr int_t negative = -int_t(0x12345u);
     constexpr int_t multiword_negative = -int_t((uint_t(0x1234567890abcdefull) << 64) + uint_t(0x0fedcba987654321ull));
+
     constexpr std::hash<int_t> signed_hasher = {};
     constexpr std::hash<uint_t> unsigned_hasher = {};
 
@@ -392,6 +388,7 @@ void run_signed_hash_tests()
     static_assert(std::hash<int_t>()(positive) == std::hash<int_t>()(int_t(0x12345u)));
     static_assert(std::hash<int_t>()(negative) == std::hash<int_t>()(-int_t(0x12345u)));
     static_assert(std::hash<int_t>()(multiword_negative) == std::hash<int_t>()(-int_t((uint_t(0x1234567890abcdefull) << 64) + uint_t(0x0fedcba987654321ull))));
+
     ASSERT_EQ(signed_hasher(zero), signed_hasher(int_t(0)));
     ASSERT_EQ(signed_hasher(positive), signed_hasher(int_t(0x12345u)));
     ASSERT_EQ(signed_hasher(negative), signed_hasher(-int_t(0x12345u)));
@@ -402,6 +399,7 @@ void run_signed_hash_tests()
     static_assert(std::hash<int_t>()(int_t(-1)) == std::hash<uint_t>()(uint_t(-1)));
     static_assert(std::hash<int_t>()(negative) == std::hash<uint_t>()(static_cast<uint_t>(negative)));
     static_assert(std::hash<int_t>()(multiword_negative) == std::hash<uint_t>()(static_cast<uint_t>(multiword_negative)));
+
     ASSERT_EQ(signed_hasher(int_t(-1)), unsigned_hasher(uint_t(-1)));
     ASSERT_EQ(signed_hasher(negative), unsigned_hasher(static_cast<uint_t>(negative)));
     ASSERT_EQ(signed_hasher(multiword_negative), unsigned_hasher(static_cast<uint_t>(multiword_negative)));
@@ -434,6 +432,8 @@ void run_signed_hash_tests()
     ASSERT_EQ(mapped_values[negative], 2);
     ASSERT_EQ(mapped_values[multiword_negative], 3);
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // stl_properties_tests

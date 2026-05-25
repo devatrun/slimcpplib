@@ -14,14 +14,15 @@
 
 #include "test_type_sets.h"
 
-#include <gtest/gtest.h>
-
 #include <slimcpplib/long_io.h>
+
+#include <gtest/gtest.h>
 
 #include <sstream>
 #include <string>
 
 using namespace slim::literals;
+
 namespace slim
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,9 +57,11 @@ void run_128_signed_decimal_round_trip_tests()
     {
         std::ostringstream oss;
         oss << positive_value;
+
         int_t recovered;
         std::istringstream iss(oss.str());
         iss >> recovered;
+
         ASSERT_EQ(positive_value, recovered);
     }
 
@@ -70,6 +73,7 @@ void run_128_signed_decimal_round_trip_tests()
         oss << negative_value;
         const std::string value_string = oss.str();
         ASSERT_EQ(value_string[0], '-');  // must start with '-'
+
         int_t recovered;
         std::istringstream iss(value_string);
         iss >> recovered;
@@ -192,6 +196,7 @@ void run_special_value_decimal_round_trip_tests()
     {
         std::ostringstream oss;
         oss << wide_unsigned;
+
         uint_t recovered;
         std::istringstream iss(oss.str());
         iss >> recovered;
@@ -201,6 +206,7 @@ void run_special_value_decimal_round_trip_tests()
     {
         std::ostringstream oss;
         oss << signed_min;
+
         int_t recovered;
         std::istringstream iss(oss.str());
         iss >> recovered;
@@ -210,6 +216,7 @@ void run_special_value_decimal_round_trip_tests()
     {
         std::ostringstream oss;
         oss << signed_max;
+
         int_t recovered;
         std::istringstream iss(oss.str());
         iss >> recovered;
@@ -339,6 +346,7 @@ template<typename uint_t>
 void run_decimal_output_tests()
 {
     std::ostringstream decimal_stream;
+
     decimal_stream << uint_t(0);
     ASSERT_EQ(decimal_stream.str(), "0");
 
@@ -365,6 +373,7 @@ template<typename uint_t>
 void run_hex_output_tests()
 {
     std::ostringstream hex_stream;
+
     hex_stream << std::hex << uint_t(0xdeadbeefull);
     ASSERT_EQ(hex_stream.str(), "deadbeef");
 
@@ -381,6 +390,7 @@ template<typename uint_t>
 void run_octal_output_tests()
 {
     std::ostringstream octal_stream;
+
     octal_stream << std::oct << uint_t(0);
     ASSERT_EQ(octal_stream.str(), "0");
 

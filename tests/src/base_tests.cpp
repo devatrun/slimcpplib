@@ -43,13 +43,6 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-using native_word_t = typename uint_t::native_array_t::value_type;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t>
 void run_unsigned_128_initialization_and_conversion_tests()
 {
@@ -61,8 +54,9 @@ void run_unsigned_128_initialization_and_conversion_tests()
     // construct long integer from unsigned integer value
 
     constexpr uint_t from_uint = 1u;
-    static_assert(from_uint == 1);
     constexpr uint_t from_intmax = ~std::intmax_t(0);
+
+    static_assert(from_uint == 1);
     static_assert(from_intmax == -1);
 
     // construct long integer from signed integer value
@@ -73,6 +67,7 @@ void run_unsigned_128_initialization_and_conversion_tests()
     // construct long integer from shorter long integer value
 
     constexpr auto low_word_value = uint_t(native_word_t<uint_t>(0x11223344u));
+
     constexpr auto narrowed_to_uint32 = static_cast<uint32_t>(low_word_value);
     static_assert(narrowed_to_uint32 == 0x11223344u);
 
@@ -80,7 +75,6 @@ void run_unsigned_128_initialization_and_conversion_tests()
 
     constexpr uint_t from_true = true;
     static_assert(from_true == 1);
-
 }
 
 
@@ -96,10 +90,10 @@ void run_signed_128_initialization_and_conversion_tests()
 
     // construct long integer from long integer with inverse sign
 
-    constexpr int_t from_uint_neg = uint_t(-1);
-    static_assert(from_uint_neg == -1);
-    
     constexpr uint_t from_int_neg = int_t(-1);
+    constexpr int_t from_uint_neg = uint_t(-1);
+    
+    static_assert(from_uint_neg == -1);
     static_assert(from_int_neg == -1);
 
     // construct long integer from boolean value
@@ -163,7 +157,9 @@ void run_unsigned_128_swap_and_comparison_tests()
 
     uint_t left_runtime = right_expected;
     uint_t right_runtime = left_expected;
+    
     left_runtime.swap(right_runtime);
+
     ASSERT_EQ(left_runtime, left_expected);
     ASSERT_EQ(right_runtime, right_expected);
 
@@ -191,7 +187,9 @@ void run_signed_128_swap_and_comparison_tests()
 
     int_t left_runtime = right_expected;
     int_t right_runtime = left_expected;
+
     left_runtime.swap(right_runtime);
+
     ASSERT_EQ(left_runtime, left_expected);
     ASSERT_EQ(right_runtime, right_expected);
 
@@ -204,7 +202,6 @@ void run_signed_128_swap_and_comparison_tests()
     static_assert(-1 <= zero);
     static_assert(zero > -1);
     static_assert(zero >= 0);
-
 }
 
 
@@ -217,10 +214,12 @@ void run_unsigned_256_bitwise_tests()
     constexpr uint_t ones = -1;
 
     // inverse all bits
+
     static_assert(~zero == -1);
     static_assert(~ones == 0);
 
     // perform AND, OR and XOR operations
+
     static_assert((zero & ones) == 0);
     static_assert((zero | ones) == -1);
     static_assert((zero ^ ones) == -1);
@@ -235,13 +234,14 @@ void run_unsigned_256_bitwise_tests()
 template<typename uint_t>
 void run_unsigned_128_bit_shift_tests()
 {
+    // shift argument has native integer type
+
     constexpr uint_t bits = -1;
     constexpr uint_t shift = 127;
 
-    // shift argument has native integer type
-
     static_assert((bits >> static_cast<int>(shift)) == 1);
     static_assert((bits << 127) == (uint_t(0x8000000000000000ull) << 64));
+
     ASSERT_EQ(bits >> static_cast<int>(shift), uint_t(1));
     ASSERT_EQ(bits << 127, uint_t(0x8000000000000000ull) << 64);
 }
@@ -256,10 +256,12 @@ void run_128_arithmetic_operation_tests()
     constexpr auto svalue = -int_t((uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull));
 
     // unary plus
+
     static_assert(+uvalue == uvalue);
     static_assert(+svalue == svalue);
 
     // increment and decrement
+
     static_assert(++uint_t(uvalue) == uvalue + 1);
     static_assert(uint_t(uvalue)++ == uvalue);
     static_assert(--uint_t(uvalue) == uvalue - 1);
@@ -270,6 +272,7 @@ void run_128_arithmetic_operation_tests()
     static_assert(int_t(svalue)-- == svalue);
 
     // multiplication, division and modulo
+
     static_assert(uvalue * 1 == uvalue);
     static_assert(svalue * 1 == svalue);
     static_assert(uvalue / 1 == uvalue);
@@ -297,10 +300,10 @@ void run_128_arithmetic_operation_tests()
 template<typename uint_t, typename int_t>
 void run_128_muldiv_tests()
 {
+    // multiplication then division operation
+
     constexpr auto uvalue = (uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull);
     constexpr auto svalue = -int_t((uint_t(0xf473e8e5f6e812c3ull) << 64) + uint_t(0xfde4523b51b6d251ull));
-
-    // multiplication then division operation
 
     ASSERT_EQ(muldiv(uvalue, uvalue, uvalue), uvalue);
     ASSERT_EQ(muldiv(svalue, svalue, svalue), svalue);
@@ -387,6 +390,8 @@ void run_pre_post_increment_decrement_tests()
     ASSERT_EQ(int_postfix_value, int_value_r - 1);
 
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // base_tests

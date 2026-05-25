@@ -99,6 +99,7 @@ std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";      
 * [signed_tests.cpp](tests/src/signed_tests.cpp) - signed arithmetic, comparisons, sign handling, division, and modulo behavior.
 * [overflow_boundary_tests.cpp](tests/src/overflow_boundary_tests.cpp) - overflow-sensitive and boundary-value arithmetic cases.
 * [literal_mixed_tests.cpp](tests/src/literal_mixed_tests.cpp) - literal parsing and mixed operations with native integer types.
+* [fixdiv_tests.cpp](tests/src/fixdiv_tests.cpp) - fixed divider creation and division behavior from `long_fixdiv.h`.
 * [io_tests.cpp](tests/src/io_tests.cpp) - standard stream input/output formatting and round-trip parsing.
 * [stl_properties_tests.cpp](tests/src/stl_properties_tests.cpp) - STL integration, including `std::numeric_limits`, `std::hash`, and related properties.
 ## Performance

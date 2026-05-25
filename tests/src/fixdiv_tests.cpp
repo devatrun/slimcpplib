@@ -14,9 +14,9 @@
 
 #include "test_type_sets.h"
 
-#include <gtest/gtest.h>
-
 #include <slimcpplib/long_fixdiv.h>
+
+#include <gtest/gtest.h>
 
 using namespace slim::literals;
 
@@ -26,13 +26,6 @@ namespace slim
 // standalone functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename uint_t>
-using native_word_t = typename uint_t::native_array_t::value_type;
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename uint_t>
 void run_128_unsigned_divide_by_one_tests()
 {
@@ -98,8 +91,8 @@ void run_128_unsigned_consistency_sweep_tests()
         uint_t(-1)
     };
 
-    for (const auto& divisor : divisors)
-    {
+    for (const auto& divisor : divisors) {
+
         const auto divider = make_fixed_divider(divisor);
         for (const auto& dividend : dividends)
             ASSERT_EQ(dividend / divider, dividend / divisor);
@@ -112,13 +105,10 @@ void run_128_unsigned_consistency_sweep_tests()
 template<typename uint_t>
 void run_128_unsigned_swap_tests()
 {
-    // prepare representative dividends
+    // prepare representative dividends and dividers with different division paths
 
     const auto dividend1 = uint_t(12345) + (uint_t(67890) << 32) + (uint_t(13579) << 64) + (uint_t(24680) << 96);
     const auto dividend2 = uint_t(-1);
-
-    // prepare dividers with different division paths
-
     const uint_t divisor1 = 7;
     const uint_t divisor2 = (uint_t(1) << 64) + uint_t(3);
 
@@ -170,14 +160,14 @@ void run_256_unsigned_fixed_divider_boundary_tests()
         (uint_t(1) << 255) - 1
     };
 
-    for (const auto& divisor : divisors)
-    {
+    for (const auto& divisor : divisors) {
+
         const auto divider = make_fixed_divider(divisor);
 
         // fixed-divider quotients must match operator/ and preserve div/mod invariants
 
-        for (const auto& dividend : dividends)
-        {
+        for (const auto& dividend : dividends) {
+
             const uint_t quotient = dividend / divider;
             const uint_t remainder = dividend % divisor;
 
