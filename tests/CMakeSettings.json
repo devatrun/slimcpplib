@@ -1,0 +1,174 @@
+﻿{
+    "configurations": [
+        {
+            "name": "x86-debug",
+            "generator": "Ninja",
+            "configurationType": "debug",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "msvc_x86" ],
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "win32",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "x86-release",
+            "generator": "Ninja",
+            "configurationType": "release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "msvc_x86" ],
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "win32",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "x64-debug",
+            "generator": "Ninja",
+            "configurationType": "debug",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "x64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "x64-release",
+            "generator": "Ninja",
+            "configurationType": "release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "x64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "x64-release-with-debug_info",
+            "generator": "Ninja",
+            "configurationType": "relwithdebinfo",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "x64",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "wsl-gcc-debug",
+            "generator": "Ninja",
+            "configurationType": "debug",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "linux_x64" ],
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "linux-gcc",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "wsl-gcc-release",
+            "generator": "Ninja",
+            "configurationType": "release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "linux_x64" ],
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "linux-gcc",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "wsl-clang-debug",
+            "generator": "Ninja",
+            "configurationType": "debug",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "linux_clang_x64" ],
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "linux-clang",
+                    "type": "STRING"
+                }
+            ]
+        },
+        {
+            "name": "wsl-clang-release",
+            "generator": "Ninja",
+            "configurationType": "release",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeExecutable": "cmake",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "linux_clang_x64" ],
+            "wslPath": "${defaultWSLPath}",
+            "variables": [
+                {
+                    "name": "ARCHITECTURE",
+                    "value": "linux-clang",
+                    "type": "STRING"
+                }
+            ]
+        }
+    ]
+}

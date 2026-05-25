@@ -1,0 +1,69 @@
+AccessModifierOffset: -4
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+#AlignConsecutiveMacros: false
+AlignEscapedNewlines: DontAlign
+AlignOperands: false
+AlignTrailingComments: true
+#AllowAllArgumentsOnNextLine: false
+#AllowAllConstructorInitializersOnNextLine : true
+AllowAllParametersOfDeclarationOnNextLine: false
+#AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+#AllowShortIfStatementsOnASingleLine: Never
+#AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine : false
+#AlwaysBreakAfterReturnType: true
+AlwaysBreakBeforeMultilineStrings: false
+#AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BraceWrapping: 
+#AfterCaseLabel: true
+    AfterClass: true
+    AfterControlStatement: false
+    AfterFunction: true
+    AfterNamespace: true
+    AfterStruct: true
+    AfterUnion: true
+    AfterExternBlock: true
+    BeforeCatch: false
+    BeforeElse: false
+    SplitEmptyFunction: true
+    SplitEmptyRecord: true
+    SplitEmptyNamespace: true
+BreakBeforeBraces: Linux
+BreakConstructorInitializers : BeforeComma
+ColumnLimit: 0
+Cpp11BracedListStyle: false
+ConstructorInitializerIndentWidth: 0
+FixNamespaceComments: true
+IncludeBlocks: Preserve
+IndentCaseLabels: false
+#IndentGotoLabels: false
+IndentPPDirectives: None
+IndentWidth : 4
+KeepEmptyLinesAtTheStartOfBlocks: true
+Language: Cpp
+MaxEmptyLinesToKeep: 3
+NamespaceIndentation: None
+PointerAlignment: Left
+ReflowComments: true
+SpaceAfterCStyleCast: false
+#SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+#SpaceBeforeCpp11BracedList: false
+#SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+#SpaceBeforeRangeBasedForLoopColon: true
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 4
+UseTab: Never

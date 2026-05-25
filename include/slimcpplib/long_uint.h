@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.3
+// version 2.0
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2020-2021 Yury Kalmykov <y_kalmykov@mail.ru>.
+// Copyright (c) 2020-2026 Yury Kalmykov <y_kalmykov@mail.ru>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -47,8 +47,8 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // type and constant definition
 
-    inline static constexpr uint_t lo = 0;
-    inline static constexpr uint_t hi = size - 1;
+    static constexpr uint_t lo = 0;
+    static constexpr uint_t hi = size - 1;
 
     using native_array_t = std::array<native_t, size>;
 
@@ -145,8 +145,11 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
 template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_uint_t<native_t, size>::long_uint_t(const long_uint_t<native_t, other_size>& that) noexcept
-: digits(make_array<size>(that.digits, [](const auto& digits, uint_t idx) { return digits[idx]; }))
 {
+    for (uint_t n = 0; n < other_size; ++n)
+        digits[n] = that.digits[n];
+    for (uint_t n = other_size; n < std::size(digits); ++n)
+        digits[n] = native_t(0);
 }
 
 template<typename native_t, uint_t size>
@@ -158,18 +161,16 @@ constexpr long_uint_t<native_t, size>::long_uint_t(native_array_t digits) noexce
 template<typename native_t, uint_t size>
 template<typename type_t, std::enable_if_t<std::is_unsigned_v<type_t>, int>>
 constexpr long_uint_t<native_t, size>::long_uint_t(type_t value) noexcept
-: digits(make_array<size>(digits, [&value](const auto& /*digits*/, uint_t idx) {
-
+{
     constexpr uint_t value_size = std::min(size, (byte_count_v<type_t> + byte_count_v<native_t> - 1) / byte_count_v<native_t>);
 
-    if (idx >= value_size)
-        return native_t(0);
+    for (uint_t n = 0; n < value_size; ++n) {
 
-    const native_t digit = value & ~native_t(0);
-    value >>= std::min(bit_count_v<type_t> - 1, bit_count_v<native_t>);
-    return digit;
-}))
-{
+        digits[n] = value & ~native_t(0);
+        value >>= std::min(bit_count_v<type_t> -1, bit_count_v<native_t>);
+    }
+    for (uint_t n = value_size; n < std::size(digits); ++n)
+        digits[n] = native_t(0);
 }
 
 template<typename native_t, uint_t size>
@@ -217,7 +218,12 @@ template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_uint_t<native_t, size>::operator long_uint_t<native_t, other_size>() const noexcept
 {
-    return make_array<other_size>(digits, [](const auto& digits, uint_t idx) { return digits[idx]; });
+    long_uint_t<native_t, other_size> tmp;
+
+    for (uint_t n = 0; n < other_size; ++n)
+        tmp.digits[n] = digits[n];
+
+    return tmp;
 }
 
 
@@ -315,9 +321,12 @@ constexpr bool long_uint_t<native_t, size>::operator>=(const long_uint_t& that) 
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() const noexcept
 {
-    return make_array<size>(digits, [](const auto& digits, uint_t idx) {
-        return ~digits[idx];
-    });
+    long_uint_t tmp;
+
+    for (uint_t n = 0; n < std::size(digits); ++n)
+        tmp.digits[n] = ~digits[n];
+
+    return tmp;
 }
 
 
@@ -562,14 +571,17 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator--(in
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() const noexcept
 {
+    long_uint_t tmp;
     bool borrow = true;
 
-    return make_array<size>(digits, [&borrow](const auto& digits, uint_t idx) {
+    for (uint_t n = 0; n < std::size(digits); ++n) {
 
-        native_t digit = digits[idx];
+        native_t digit = digits[n];
         borrow = subb<native_t>(digit, 0, borrow);
-        return ~digit;
-    });
+        tmp.digits[n] = ~digit;
+    }
+
+    return tmp;
 }
 
 
@@ -819,35 +831,10 @@ constexpr uint8_t kSeparator = 0xff;
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t mulc_costexpr(const type_t& value1, const type_t& value2, type_t& carry) noexcept
-{
-    const type_t value1_lo = half_lo(value1);
-    const type_t value1_hi = half_hi(value1);
-    const type_t value2_lo = half_lo(value2);
-    const type_t value2_hi = half_hi(value2);
-
-    const type_t t0 = value1_lo * value2_lo;
-    const type_t t1 = value1_hi * value2_lo + half_hi(t0);
-    const type_t t2 = value1_lo * value2_hi + half_lo(t1);
-    const type_t t3 = value1_hi * value2_hi + half_hi(t2);
-
-    type_t result_lo = half_make_hi(half_lo(t2)) + half_lo(t0);
-    type_t result_hi = t3 + half_hi(t1);
-
-    result_hi += add<type_t>(result_lo, carry);
-    carry = result_hi;
-
-    return result_lo;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<uint_t literal_size, typename digit_parser_t>
 constexpr std::optional<std::array<uint8_t, literal_size>> parse_digits(const std::array<char, literal_size>& literal, const digit_parser_t& digit_parser) noexcept
 {
-    std::array<uint8_t, literal_size> digits = {};
+    std::array<uint8_t, literal_size> digits;
 
     for (uint_t n = 0; n < std::size(digits); ++n) {
 
@@ -884,7 +871,7 @@ constexpr std::pair<parse_result, long_t> parse_literal(const std::array<char, l
             continue;
 
         for (auto& digit : digits)
-            digit = mulc_costexpr<native_t>(digit, native_t(base), carry);
+            carry = mulc<native_t>(digit, native_t(base), carry);
 
         if (carry > 0)
             return std::make_pair(parse_result::overflow, long_t(0));
@@ -896,41 +883,22 @@ constexpr std::pair<parse_result, long_t> parse_literal(const std::array<char, l
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-constexpr std::optional<uint8_t> parse_oct_digit(char ch) noexcept
-{
-    if (ch == '\'')
-        return kSeparator;
-
-    if (ch >= '0' && ch <= '7')
-        return uint8_t(uint_t(ch) - '0');
-
-    return std::nullopt;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename long_t, typename... char_t>
 constexpr std::pair<parse_result, long_t> parse_oct_literal(char, char_t... chars) noexcept
 {
     constexpr uint_t literal_size = sizeof...(chars);
     const std::array<char, literal_size> literal = { chars... };
 
-    return parse_literal<long_t, 8>(literal, &parse_oct_digit);
-}
+    return parse_literal<long_t, 8>(literal, [](char ch) -> std::optional<uint8_t> {
 
+        if (ch == '\'')
+            return kSeparator;
 
+        if (ch >= '0' && ch <= '7')
+            return uint8_t(uint_t(ch) - '0');
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-constexpr std::optional<uint8_t> parse_dec_digit(char ch) noexcept
-{
-    if (ch == '\'')
-        return kSeparator;
-
-    if (ch >= '0' && ch <= '9')
-        return uint8_t(uint_t(ch) - '0');
-
-    return std::nullopt;
+        return std::nullopt;
+    });
 }
 
 
@@ -942,25 +910,16 @@ constexpr std::pair<parse_result, long_t> parse_dec_literal(char_t... chars) noe
     constexpr uint_t literal_size = sizeof...(chars);
     const std::array<char, literal_size> literal = { chars... };
 
-    return parse_literal<long_t, 10>(literal, &parse_dec_digit);
-}
+    return parse_literal<long_t, 10>(literal, [](char ch) -> std::optional<uint8_t> {
 
+        if (ch == '\'')
+            return kSeparator;
 
+        if (ch >= '0' && ch <= '9')
+            return uint8_t(uint_t(ch) - '0');
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-constexpr std::optional<uint8_t> parse_hex_digit(char ch) noexcept
-{
-    if (ch == '\'')
-        return kSeparator;
-
-    if (ch >= '0' && ch <= '9')
-        return uint8_t(uint_t(ch) - '0');
-    if (ch >= 'A' && ch <= 'F')
-        return uint8_t(10 + uint_t(ch) - 'A');
-    else if (ch >= 'a' && ch <= 'f')
-        return uint8_t(10 + uint_t(ch) - 'a');
-
-    return std::nullopt;
+        return std::nullopt;
+    });
 }
 
 
@@ -972,7 +931,20 @@ constexpr std::pair<parse_result, long_t> parse_hex_literal(char, char, char_t..
     constexpr uint_t literal_size = sizeof...(chars);
     const std::array<char, literal_size> literal = { chars... };
 
-    return parse_literal<long_t, 16>(literal, &parse_hex_digit);
+    return parse_literal<long_t, 16>(literal, [](char ch) -> std::optional<uint8_t> {
+
+        if (ch == '\'')
+            return kSeparator;
+
+        if (ch >= '0' && ch <= '9')
+            return uint8_t(uint_t(ch) - '0');
+        if (ch >= 'A' && ch <= 'F')
+            return uint8_t(10 + uint_t(ch) - 'A');
+        else if (ch >= 'a' && ch <= 'f')
+            return uint8_t(10 + uint_t(ch) - 'a');
+
+        return std::nullopt;
+    });
 }
 
 
@@ -991,16 +963,16 @@ constexpr long_uint_t parse_literal() noexcept
         if constexpr (char_count == 1 || (literal[1] != 'X' && literal[1] != 'x')) {
 
             constexpr std::pair<parse_result, long_uint_t> value = parse_oct_literal<long_uint_t>(chars...);
-            static_assert(value.first != parse_result::unexpected, "unexpected simbol unsigned in long integer oct literal");
-            static_assert(value.first != parse_result::overflow, "oveflow in unsigned long integer oct literal");
+            static_assert(value.first != parse_result::unexpected, "unexpected symbol unsigned in long integer octal literal");
+            static_assert(value.first != parse_result::overflow, "overflow in unsigned long integer octal literal");
 
             return value.second;
 
         } else {
 
             constexpr std::pair<parse_result, long_uint_t> value = parse_hex_literal<long_uint_t>(chars...);
-            static_assert(value.first != parse_result::unexpected, "unexpected simbol in unsigned long integer hex literal");
-            static_assert(value.first != parse_result::overflow, "oveflow in unsigned long integer hex literal");
+            static_assert(value.first != parse_result::unexpected, "unexpected symbol in unsigned long integer hexadecimal literal");
+            static_assert(value.first != parse_result::overflow, "overflow in unsigned long integer hexadecimal literal");
 
             return value.second;
         }
@@ -1008,8 +980,8 @@ constexpr long_uint_t parse_literal() noexcept
     } else {
 
         constexpr std::pair<parse_result, long_uint_t> value = parse_dec_literal<long_uint_t>(chars...);
-        static_assert(value.first != parse_result::unexpected, "unexpected simbol in unsigned long integer dec literal");
-        static_assert(value.first != parse_result::overflow, "oveflow in unsigned long integer dec literal");
+        static_assert(value.first != parse_result::unexpected, "unexpected symbol in unsigned long integer decimal literal");
+        static_assert(value.first != parse_result::overflow, "overflow in unsigned long integer decimal literal");
 
         return value.second;
     }

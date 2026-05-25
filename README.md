@@ -5,8 +5,9 @@ The main features:
 * easy to use: the library is header-only
 * small: consists of few header files, there is no dependencies
 * speed: use intrinsics if supported
-* cross-platform: supports MSVC, GCC and CLANG C++17 compilers
+* cross-platform: supports MSVC, GCC and CLANG C++20 compilers
 * exception neutral: doesn't use exceptions, all methods are noexсept
+* STL friendly: supports `std::numeric_limits` and `std::hash`
 
 The library implements two main classes:
 ```c++
@@ -45,6 +46,7 @@ namespace your_namespace
 
 } // namespace your_namespace
 ```
+The library also provides `std::numeric_limits` specializations for `long_uint_t` and `long_int_t`, and `std::hash` specializations for use with STL hash containers such as `std::unordered_set` and `std::unordered_map`.
 ## Constant declaration:
 ```c++
 constexpr auto uo = 03766713523035452062041773345651416625031020_ui128;  // octal unsigned integer
@@ -87,11 +89,18 @@ std::cout << std::dec << 03766713523035452062041773345651416625031020_ui128 << "
 std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";            // hexadecimal
 ```
 ## Limitations
-* Although all methods and functions are defined using the constexpr qualifier, due to the limitations of C++ 17, working completely at compile time is only possible for code without instrinsics, since there is no implementation of [std::is_constant_evaluated()](https://en.cppreference.com/w/cpp/types/is_constant_evaluated) in the standard before C++ 20.
 * The design of long integers tries to completely repeat the behavior of native integers, but still differs. For example, the propagation of integer types always occurs from a signed integer to an unsigned integer, and an implicit conversion from a larger integer to a smaller integer does not cause a warning, but a compilation error.
+* Almost all operations can be evaluated at compile time. The exceptions are operations that may cause undefined behavior, where compile-time evaluation is not guaranteed.
 * Location of digits always corresponds to little-endian, regardless of the platform, which should be taken into account when serialization/deserialization. The digits themselves are always in platform natural order.
-## Examples
-[main.cpp](examples/main.cpp) - examples of using the main interface of the library with comments.
+## Tests and examples
+* [base_tests.cpp](tests/src/base_tests.cpp) - basic construction, conversions, constants, swaps, and core type behavior.
+* [arithmetic_tests.cpp](tests/src/arithmetic_tests.cpp) - arithmetic, bitwise, comparison, and shift operations for unsigned long integers.
+* [compound_shift_tests.cpp](tests/src/compound_shift_tests.cpp) - compound left and right shift scenarios across limb boundaries.
+* [signed_tests.cpp](tests/src/signed_tests.cpp) - signed arithmetic, comparisons, sign handling, division, and modulo behavior.
+* [overflow_boundary_tests.cpp](tests/src/overflow_boundary_tests.cpp) - overflow-sensitive and boundary-value arithmetic cases.
+* [literal_mixed_tests.cpp](tests/src/literal_mixed_tests.cpp) - literal parsing and mixed operations with native integer types.
+* [io_tests.cpp](tests/src/io_tests.cpp) - standard stream input/output formatting and round-trip parsing.
+* [stl_properties_tests.cpp](tests/src/stl_properties_tests.cpp) - STL integration, including `std::numeric_limits`, `std::hash`, and related properties.
 ## Performance
 All measurements are not intended to be a strong performance tests and are provided simply for relative comparison of the operation costs. All measurements were taken on Intel (R) Core (TM) i5-9400F CPU @ 2.90GHz in a 64-bit configuration with 128-bit integers.
 | Operation  | Average time (in ns.)  |

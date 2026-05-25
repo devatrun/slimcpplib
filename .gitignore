@@ -1,3 +1,9 @@
+# Temporary
+*.vs/
+bin/
+lib/
+out/
+
 # Prerequisites
 *.d
 

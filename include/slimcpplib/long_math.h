@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.3
+// version 2.0
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2020-2021 Yury Kalmykov <y_kalmykov@mail.ru>.
+// Copyright (c) 2020-2026 Yury Kalmykov <y_kalmykov@mail.ru>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -41,8 +41,8 @@
 #include <optional>
 #include <type_traits>
 
-#if !(defined(_MSC_VER) && _MSC_VER >= 1910 && ((defined(_MSVC_LANG) && _MSVC_LANG > 201402)) || (__cplusplus > 201402))
-#error "Library SLIMCPP requires a compiler that supports C++ 17!"
+#if !(defined(_MSC_VER) && _MSC_VER >= 1929 && ((defined(_MSVC_LANG) && _MSVC_LANG > 201703)) || (__cplusplus > 201703))
+#error "Library SLIMCPP requires a compiler that supports C++ 20!"
 #endif
 
 namespace slim
@@ -63,7 +63,7 @@ using int_t = std::intptr_t;
 template<typename type_t>
 constexpr uint_t byte_count_v = sizeof(type_t);
 template<typename type_t>
-constexpr uint_t bit_count_v = byte_count_v<type_t>* CHAR_BIT;
+constexpr uint_t bit_count_v = byte_count_v<type_t> * std::numeric_limits<uint8_t>::digits;
 
 
 
@@ -72,9 +72,9 @@ constexpr uint_t bit_count_v = byte_count_v<type_t>* CHAR_BIT;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-inline constexpr bool is_unsigned_v = std::numeric_limits<type_t>::is_integer && !std::numeric_limits<type_t>::is_signed;
+constexpr bool is_unsigned_v = std::numeric_limits<type_t>::is_integer && !std::numeric_limits<type_t>::is_signed;
 template<typename type_t>
-inline constexpr bool is_signed_v = std::numeric_limits<type_t>::is_integer && std::numeric_limits<type_t>::is_signed;
+constexpr bool is_signed_v = std::numeric_limits<type_t>::is_integer && std::numeric_limits<type_t>::is_signed;
 
 
 
@@ -83,11 +83,11 @@ inline constexpr bool is_signed_v = std::numeric_limits<type_t>::is_integer && s
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-inline constexpr bool is_unsigned_array_v = false;
+constexpr bool is_unsigned_array_v = false;
 template<typename type_t, uint_t size>
-inline constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t>;
+constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t>;
 template<typename type_t, uint_t size>
-inline constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t>;
+constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t>;
 
 
 
@@ -133,13 +133,6 @@ using half_t = typename half_type<type_t>::type;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// make array from specified array
-
-template<uint_t size_out, typename type_t, uint_t size_in, typename func_t>
-constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func);
-template<uint_t size_out, typename type_t, uint_t size_in, typename func_t, uint_t... idx>
-constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>);
 
 // extract low half of unsigned integer
 
@@ -220,25 +213,6 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint_t size_out, typename type_t, uint_t size_in, typename func_t>
-constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func)
-{
-    constexpr uint_t size = std::min(size_in, size_out);
-    return make_array<size_out>(arr, func, std::make_integer_sequence<uint_t, size>{});
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<uint_t size_out, typename type_t, uint_t size_in, typename func_t, uint_t... idx>
-constexpr std::array<type_t, size_out> make_array(const std::array<type_t, size_in>& arr, const func_t& func, std::integer_sequence<uint_t, idx...>)
-{
-    return std::array<type_t, size_out>{ (func(arr, idx))... };
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
 constexpr type_t half_lo(type_t value) noexcept
 {

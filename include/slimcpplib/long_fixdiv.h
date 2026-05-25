@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.3
+// version 2.0
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2020-2021 Yury Kalmykov <y_kalmykov@mail.ru>.
+// Copyright (c) 2020-2026 Yury Kalmykov <y_kalmykov@mail.ru>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -112,6 +112,19 @@ constexpr long_fixed_divider<type_t>::long_fixed_divider(const type_t& multiplie
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // public methods
 
+template<typename type_t>
+constexpr void long_fixed_divider<type_t>::swap(long_fixed_divider& that) noexcept
+{
+    using std::swap;
+
+    swap(multiplier, that.multiplier);
+    swap(addition, that.addition);
+    swap(shift, that.shift);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t>
 constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const type_t& divider) noexcept
 {

@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.3
+// version 2.0
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2020-2021 Yury Kalmykov <y_kalmykov@mail.ru>.
+// Copyright (c) 2020-2026 Yury Kalmykov <y_kalmykov@mail.ru>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -80,7 +80,7 @@ public:
     constexpr long_int_t& operator=(long_int_t&& that) noexcept = default;
 
     constexpr bool sign() const noexcept;
-    constexpr long_int_t& negate() noexcept;
+    constexpr long_int_t negate() const noexcept;
     template<uint_t other_size, std::enable_if_t<(other_size < size), int> = 0>
     explicit constexpr operator long_int_t<native_t, other_size>() const noexcept;
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
@@ -179,9 +179,7 @@ constexpr long_int_t<native_t, size>::long_int_t(bool value) noexcept
 template<typename native_t, uint_t size>
 constexpr void long_int_t<native_t, size>::swap(long_int_t& that) noexcept
 {
-    using std::swap;
-
-    long_uint_t<native_t, size>::swap(digits, that.digits);
+    long_uint_t<native_t, size>::swap(that);
 }
 
 
@@ -197,21 +195,21 @@ constexpr bool long_int_t<native_t, size>::sign() const noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
-constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::negate() noexcept
+constexpr long_int_t<native_t, size> long_int_t<native_t, size>::negate() const noexcept
 {
-    slim::negate(digits);
-
-    return *this;
+    return -(*this);
 }
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
 template<uint_t other_size, std::enable_if_t<(other_size < size), int>>
 constexpr long_int_t<native_t, size>::operator long_int_t<native_t, other_size>() const noexcept
 {
-    return make_array<other_size>(digits, [](const auto& digits, uint_t idx) { return digits[idx]; });
+    long_int_t<native_t, other_size> other;
+
+    for (uint_t n = 0; n < other_size; ++n)
+        other.digits[n] = digits[n];
+
+    return other;
 }
 
 
@@ -405,12 +403,12 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator/=(con
     const bool sing = sign();
 
     if (sing)
-        negate();
+        *this = negate();
 
     long_uint_t<native_t, size>::operator/=(that.sign() ? -that : that);
 
     if (sing != that.sign())
-        negate();
+        *this = negate();
 
     return *this;
 }
@@ -433,12 +431,12 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator%=(con
     const bool sing = sign();
 
     if (sing)
-        negate();
+        *this = negate();
 
     long_uint_t<native_t, size>::operator%=(that.sign() ? -that : that);
 
-    if (sing != that.sign())
-        negate();
+    if (sing)
+        *this = negate();
 
     return *this;
 }

@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Simple Long Integer Math for C++
-// version 1.3
+// version 2.0
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 // SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2020-2021 Yury Kalmykov <y_kalmykov@mail.ru>.
+// Copyright (c) 2020-2026 Yury Kalmykov <y_kalmykov@mail.ru>.
 //
 // Permission is hereby  granted, free of charge, to any  person obtaining a copy
 // of this software and associated  documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@
 #pragma once
 
 #include "long_math.h"
+
+#include <functional>
 
 #if __has_include("long_math_gcc.h")
 #include "long_math_gcc.h"
@@ -66,35 +68,35 @@ public:
 
     using long_uint_t = slim::long_uint_t<type_t, size>;
 
-    static const bool is_specialized = true;
-    static const bool is_signed = false;
-    static const bool is_integer = true;
-    static const bool is_exact = true;
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+    static constexpr bool is_exact = true;
 
-    static const bool has_infinity = false;
-    static const bool has_quiet_NaN = false;
-    static const bool has_signaling_NaN = false;
-    static const float_denorm_style has_denorm = denorm_absent;
-    static const bool has_denorm_loss = false;
-    static const float_round_style round_style = round_toward_zero;
+    static constexpr bool has_infinity = false;
+    static constexpr bool has_quiet_NaN = false;
+    static constexpr bool has_signaling_NaN = false;
+    static constexpr float_denorm_style has_denorm = denorm_absent;
+    static constexpr bool has_denorm_loss = false;
+    static constexpr float_round_style round_style = round_toward_zero;
 
-    static const bool is_iec559 = false;
-    static const bool is_bounded = false;
-    static const bool is_modulo = false;
+    static constexpr bool is_iec559 = false;
+    static constexpr bool is_bounded = true;
+    static constexpr bool is_modulo = true;
 
-    static const int digits = 0;
-    static const int digits10 = 0;
-    static const int radix = 2;
+    static constexpr int digits = static_cast<int>(slim::bit_count_v<long_uint_t>);
+    static constexpr int digits10 = digits * 301 / 1000;
+    static constexpr int radix = 2;
 
-    static const int min_exponent = 0;
-    static const int min_exponent10 = 0;
-    static const int max_exponent = 0;
-    static const int max_exponent10 = 0;
+    static constexpr int min_exponent = 0;
+    static constexpr int min_exponent10 = 0;
+    static constexpr int max_exponent = 0;
+    static constexpr int max_exponent10 = 0;
 
-    static const bool traps = false;
-    static const bool tinyness_before = false;
+    static constexpr bool traps = false;
+    static constexpr bool tinyness_before = false;
 
-    static long_uint_t min() noexcept
+    static constexpr long_uint_t min() noexcept
     {
         return long_uint_t(0);
     }
@@ -104,37 +106,37 @@ public:
         return long_uint_t(0);
     }
 
-    static long_uint_t max() noexcept
+    static constexpr long_uint_t max() noexcept
     {
         return long_uint_t(-1);
     }
 
-    static long_uint_t epsilon() noexcept
+    static constexpr long_uint_t epsilon() noexcept
     {
         return long_uint_t(0);
     }
 
-    static long_uint_t round_error() noexcept
+    static constexpr long_uint_t round_error() noexcept
     {
         return long_uint_t(0);
     }
 
-    static long_uint_t infinity() noexcept
+    static constexpr long_uint_t infinity() noexcept
     {
         return long_uint_t(0);
     }
 
-    static long_uint_t quiet_NaN() noexcept
+    static constexpr long_uint_t quiet_NaN() noexcept
     {
         return long_uint_t(0);
     }
 
-    static long_uint_t signaling_NaN() noexcept
+    static constexpr long_uint_t signaling_NaN() noexcept
     {
         return long_uint_t(0);
     }
 
-    static long_uint_t denorm_min() noexcept
+    static constexpr long_uint_t denorm_min() noexcept
     {
         return long_uint_t(0);
     }
@@ -150,35 +152,35 @@ struct numeric_limits<slim::long_int_t<type_t, size>> {
 public:
     using long_int_t = slim::long_int_t<type_t, size>;
 
-    static const bool is_specialized = true;
-    static const bool is_signed = true;
-    static const bool is_integer = true;
-    static const bool is_exact = true;
+    static constexpr bool is_specialized = true;
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+    static constexpr bool is_exact = true;
 
-    static const bool has_infinity = false;
-    static const bool has_quiet_NaN = false;
-    static const bool has_signaling_NaN = false;
-    static const float_denorm_style has_denorm = denorm_absent;
-    static const bool has_denorm_loss = false;
-    static const float_round_style round_style = round_toward_zero;
+    static constexpr bool has_infinity = false;
+    static constexpr bool has_quiet_NaN = false;
+    static constexpr bool has_signaling_NaN = false;
+    static constexpr float_denorm_style has_denorm = denorm_absent;
+    static constexpr bool has_denorm_loss = false;
+    static constexpr float_round_style round_style = round_toward_zero;
 
-    static const bool is_iec559 = false;
-    static const bool is_bounded = false;
-    static const bool is_modulo = false;
+    static constexpr bool is_iec559 = false;
+    static constexpr bool is_bounded = true;
+    static constexpr bool is_modulo = true;
 
-    static const int digits = 0;
-    static const int digits10 = 0;
-    static const int radix = 2;
+    static constexpr int digits = static_cast<int>(slim::bit_count_v<long_int_t> - 1);
+    static constexpr int digits10 = digits * 301 / 1000;
+    static constexpr int radix = 2;
 
-    static const int min_exponent = 0;
-    static const int min_exponent10 = 0;
-    static const int max_exponent = 0;
-    static const int max_exponent10 = 0;
+    static constexpr int min_exponent = 0;
+    static constexpr int min_exponent10 = 0;
+    static constexpr int max_exponent = 0;
+    static constexpr int max_exponent10 = 0;
 
-    static const bool traps = false;
-    static const bool tinyness_before = false;
+    static constexpr bool traps = false;
+    static constexpr bool tinyness_before = false;
 
-    static long_int_t min() noexcept
+    static constexpr long_int_t min() noexcept
     {
         return slim::long_uint_t<type_t, size>(1) << (slim::bit_count_v<long_int_t> - 1);
     }
@@ -188,39 +190,90 @@ public:
         return min();
     }
 
-    static long_int_t max() noexcept
+    static constexpr long_int_t max() noexcept
     {
         return ~slim::long_uint_t<type_t, size>(min());
     }
 
-    static long_int_t epsilon() noexcept
+    static constexpr long_int_t epsilon() noexcept
     {
         return long_int_t(0);
     }
 
-    static long_int_t round_error() noexcept
+    static constexpr long_int_t round_error() noexcept
     {
         return long_int_t(0);
     }
 
-    static long_int_t infinity() noexcept
+    static constexpr long_int_t infinity() noexcept
     {
         return long_int_t(0);
     }
 
-    static long_int_t quiet_NaN() noexcept
+    static constexpr long_int_t quiet_NaN() noexcept
     {
         return long_int_t(0);
     }
 
-    static long_int_t signaling_NaN() noexcept
+    static constexpr long_int_t signaling_NaN() noexcept
     {
         return long_int_t(0);
     }
 
-    static long_int_t denorm_min() noexcept
+    static constexpr long_int_t denorm_min() noexcept
     {
         return long_int_t(0);
+    }
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// class hash<slim::long_uint_t<type_t, size>>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, size_t size>
+struct hash<slim::long_uint_t<type_t, size>> {
+public:
+    using long_uint_t = slim::long_uint_t<type_t, size>;
+
+    static constexpr size_t combine_hash(size_t value1, size_t value2) noexcept
+    {
+        return value1 ^ (value2 + size_t(0x9e3779b9) + (value1 << 6) + (value1 >> 2));
+    }
+
+    static constexpr size_t hash_word(type_t value) noexcept
+    {
+        if constexpr (sizeof(type_t) <= sizeof(size_t))
+            return static_cast<size_t>(value);
+        else
+            return combine_hash(static_cast<size_t>(slim::half_lo(value)), static_cast<size_t>(slim::half_hi(value)));
+    }
+
+    constexpr size_t operator()(const long_uint_t& value) const noexcept
+    {
+        size_t result = hash_word(value.digits[0]);
+
+        for (slim::uint_t n = 1; n < size; ++n)
+            result = combine_hash(result, hash_word(value.digits[n]));
+
+        return result;
+    }
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// class hash<slim::long_int_t<type_t, size>>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, size_t size>
+struct hash<slim::long_int_t<type_t, size>> {
+public:
+    using long_uint_t = slim::long_uint_t<type_t, size>;
+    using long_int_t = slim::long_int_t<type_t, size>;
+
+    constexpr size_t operator()(const long_int_t& value) const noexcept
+    {
+        return hash<long_uint_t>()(static_cast<const long_uint_t&>(value));
     }
 };
 
@@ -359,7 +412,7 @@ constexpr long_uint_t<type_t, size / 2> half_lo(const long_uint_t<type_t, size>&
     constexpr uint_t half_size = size / 2;
     long_uint_t<type_t, half_size> result;
 
-    for (uint_t n = 0; n < half_size; n++)
+    for (uint_t n = 0; n < half_size; ++n)
         result.digits[n] = value.digits[n];
 
     return result;
@@ -383,7 +436,7 @@ constexpr long_uint_t<type_t, size / 2> half_hi(const long_uint_t<type_t, size>&
     constexpr uint_t half_size = size / 2;
     long_uint_t<type_t, half_size> result;
 
-    for (uint_t n = 0; n < half_size; n++)
+    for (uint_t n = 0; n < half_size; ++n)
         result.digits[n] = value.digits[n + half_size];
 
     return result;
@@ -407,9 +460,9 @@ constexpr long_uint_t<type_t, size * 2> half_make(const long_uint_t<type_t, size
     constexpr uint_t double_size = size * 2;
     long_uint_t<type_t, double_size> result;
 
-    for (uint_t n = 0; n < size; n++)
+    for (uint_t n = 0; n < size; ++n)
         result.digits[n] = value_lo.digits[n];
-    for (uint_t n = size; n < double_size; n++)
+    for (uint_t n = size; n < double_size; ++n)
         result.digits[n] = value_hi.digits[n - size];
 
     return result;
@@ -435,9 +488,9 @@ constexpr long_uint_t<type_t, size> half_make_hi(const long_uint_t<type_t, size>
     constexpr uint_t half_size = size / 2;
     long_uint_t result;
 
-    for (uint_t n = 0; n < half_size; n++)
+    for (uint_t n = 0; n < half_size; ++n)
         result.digits[n] = 0;
-    for (uint_t n = half_size; n < size; n++)
+    for (uint_t n = half_size; n < size; ++n)
         result.digits[n] = value.digits[n - half_size];
 
     return result;
@@ -451,7 +504,7 @@ constexpr bool sign(const long_uint_t<type_t, size>& value) noexcept
 {
     using long_uint_t = long_uint_t<type_t, size>;
 
-    return make_signed_t<long_uint_t>(value.digits[long_uint_t::hi]) < 0;
+    return make_signed_t<type_t>(value.digits[long_uint_t::hi]) < 0;
 }
 
 
@@ -604,7 +657,7 @@ constexpr long_uint_t<type_t, size> divr(const long_uint_t<type_t, size>& value1
         quotient = half_make(quotient_hi, quotient_lo);
 
         if (remainder)
-            remainder = half_make(half_uint_t(0), *remainder_lo);
+            *remainder = half_make(half_uint_t(0), *remainder_lo);
 
     } else {
 
