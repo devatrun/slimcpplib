@@ -93,15 +93,15 @@ std::cout << std::hex << 0xfedcba9876543210fedcba9876543210_ui128 << "\n";      
 * Almost all operations can be evaluated at compile time. The exceptions are operations that may cause undefined behavior, where compile-time evaluation is not guaranteed.
 * Location of digits always corresponds to little-endian, regardless of the platform, which should be taken into account when serialization/deserialization. The digits themselves are always in platform natural order.
 ## Tests and examples
-* [base_tests.cpp](tests/src/base_tests.cpp) - basic construction, conversions, constants, swaps, and core type behavior.
-* [arithmetic_tests.cpp](tests/src/arithmetic_tests.cpp) - arithmetic, bitwise, comparison, and shift operations for unsigned long integers.
-* [compound_shift_tests.cpp](tests/src/compound_shift_tests.cpp) - compound left and right shift scenarios across limb boundaries.
-* [signed_tests.cpp](tests/src/signed_tests.cpp) - signed arithmetic, comparisons, sign handling, division, and modulo behavior.
-* [overflow_boundary_tests.cpp](tests/src/overflow_boundary_tests.cpp) - overflow-sensitive and boundary-value arithmetic cases.
-* [literal_mixed_tests.cpp](tests/src/literal_mixed_tests.cpp) - literal parsing and mixed operations with native integer types.
-* [fixdiv_tests.cpp](tests/src/fixdiv_tests.cpp) - fixed divider creation and division behavior from `long_fixdiv.h`.
-* [io_tests.cpp](tests/src/io_tests.cpp) - standard stream input/output formatting and round-trip parsing.
-* [stl_properties_tests.cpp](tests/src/stl_properties_tests.cpp) - STL integration, including `std::numeric_limits`, `std::hash`, and related properties.
+* [base_tests.cpp](src/tests/base_tests.cpp) - basic construction, conversions, constants, swaps, and core type behavior.
+* [arithmetic_tests.cpp](src/tests/arithmetic_tests.cpp) - arithmetic, bitwise, comparison, and shift operations for unsigned long integers.
+* [compound_shift_tests.cpp](src/tests/compound_shift_tests.cpp) - compound left and right shift scenarios across limb boundaries.
+* [signed_tests.cpp](src/tests/signed_tests.cpp) - signed arithmetic, comparisons, sign handling, division, and modulo behavior.
+* [overflow_boundary_tests.cpp](src/tests/overflow_boundary_tests.cpp) - overflow-sensitive and boundary-value arithmetic cases.
+* [literal_mixed_tests.cpp](src/tests/literal_mixed_tests.cpp) - literal parsing and mixed operations with native integer types.
+* [fixdiv_tests.cpp](src/tests/fixdiv_tests.cpp) - fixed divider creation and division behavior from `long_fixdiv.h`.
+* [io_tests.cpp](src/tests/io_tests.cpp) - standard stream input/output formatting and round-trip parsing.
+* [stl_properties_tests.cpp](src/tests/stl_properties_tests.cpp) - STL integration, including `std::numeric_limits`, `std::hash`, and related properties.
 ## Performance
 All measurements are not intended to be a strong performance tests and are provided simply for relative comparison of the operation costs. All measurements were taken on Intel (R) Core (TM) i5-9400F CPU @ 2.90GHz in a 64-bit configuration with 128-bit integers.
 | Operation  | Average time (in ns.)  |

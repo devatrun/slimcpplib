@@ -1,11 +1,9 @@
-﻿# cmakelist.txt : executable
-cmake_minimum_required (VERSION 3.14)
-
-set (ProjectName "slimcpplibtest")
-project (${ProjectName})
+# project's target name
+set (TargetName "slimcpplib_test")
 
 # project's header files
 set (HeaderFiles
+    type_sets.h
 )
 
 # project's source files
@@ -21,22 +19,7 @@ set (SourceFiles
     stl_properties_tests.cpp
 )
 
-# project's targets
-add_executable (${ProjectName} ${HeaderFiles} ${SourceFiles})
-
-target_link_libraries (${ProjectName} 
-    gtest_main
-)
-
-target_include_directories (${ProjectName} PRIVATE
-    ${CMAKE_SOURCE_DIR}/../include
-)
-
-# include common properties
-include("${CMAKE_SOURCE_DIR}/config/cmake/base.cmake")
-
 # include gtest library
-
 include(FetchContent)
 
 # DOWNLOAD_EXTRACT_TIMESTAMP requires CMake 3.24+
@@ -54,14 +37,20 @@ else()
 endif()
 
 # for Windows: prevent overriding the parent project's compiler/linker settings
-
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# project's targets
+add_executable (${TargetName} ${HeaderFiles} ${SourceFiles})
+
+target_link_libraries (${TargetName}
+    slimcpplib
+    gtest_main
+)
+
+# include common properties
+include("${CMAKE_SOURCE_DIR}/config/cmake/base.cmake")
+
 # enable tests
-
 include(GoogleTest)
-gtest_discover_tests(slimcpplibtest)
-
-
-
+gtest_discover_tests(${TargetName})
