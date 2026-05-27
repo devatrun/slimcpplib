@@ -85,29 +85,61 @@ public:
     template<typename type_t, std::enable_if_t<std::is_signed_v<type_t>, int> = 0>
     explicit constexpr operator type_t() const noexcept;
     constexpr bool operator==(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator==(type_t value) const noexcept;
     constexpr bool operator!=(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator!=(type_t value) const noexcept;
     constexpr bool operator<(const long_uint_t& that) const noexcept;
     constexpr bool operator<=(const long_uint_t& that) const noexcept;
     constexpr bool operator>(const long_uint_t& that) const noexcept;
     constexpr bool operator>=(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator<(type_t value) const noexcept;
+    template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator<=(type_t value) const noexcept;
+    template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator>(type_t value) const noexcept;
+    template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr bool operator>=(type_t value) const noexcept;
     constexpr long_uint_t operator~() const noexcept;
     constexpr long_uint_t& operator&=(const long_uint_t& that) noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t& operator&=(type_t value) noexcept;
     constexpr long_uint_t operator&(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t operator&(type_t value) const noexcept;
     constexpr long_uint_t& operator|=(const long_uint_t& that) noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t& operator|=(type_t value) noexcept;
     constexpr long_uint_t operator|(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t operator|(type_t value) const noexcept;
     constexpr long_uint_t& operator^=(const long_uint_t& that) noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t& operator^=(type_t value) noexcept;
     constexpr long_uint_t operator^(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t operator^(type_t value) const noexcept;
     constexpr long_uint_t& operator<<=(uint_t shift) noexcept;
     constexpr long_uint_t operator<<(uint_t shift) const noexcept;
     constexpr long_uint_t& operator>>=(uint_t shift) noexcept;
     constexpr long_uint_t operator>>(uint_t shift) const noexcept;
     constexpr long_uint_t& operator+=(const long_uint_t& that) noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t& operator+=(type_t value) noexcept;
     constexpr long_uint_t operator+(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t operator+(type_t value) const noexcept;
     constexpr long_uint_t& operator++() noexcept;
     constexpr long_uint_t operator++(int) noexcept;
     constexpr long_uint_t operator+() const noexcept;
     constexpr long_uint_t& operator-=(const long_uint_t& that) noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t& operator-=(type_t value) noexcept;
     constexpr long_uint_t operator-(const long_uint_t& that) const noexcept;
+    template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int> = 0>
+    constexpr long_uint_t operator-(type_t value) const noexcept;
     constexpr long_uint_t& operator--() noexcept;
     constexpr long_uint_t operator--(int) noexcept;
     constexpr long_uint_t operator-() const noexcept;
@@ -252,9 +284,36 @@ constexpr long_uint_t<native_t, size>::operator type_t() const noexcept
 template<typename native_t, uint_t size>
 constexpr bool long_uint_t<native_t, size>::operator==(const long_uint_t& that) const noexcept
 {
-    for (uint_t n = 0; n < std::size(digits); ++n) {
+    for (uint_t n = std::size(digits); n-- > 0;) {
 
         if (digits[n] != that.digits[n])
+            return false;
+    }
+
+    return true;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator==(type_t value) const noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    if (digits[0] != native_t(value))
+        return false;
+
+    for (uint_t n = 1; n < std::size(digits); ++n) {
+
+        if (digits[n] != extension)
             return false;
     }
 
@@ -268,6 +327,16 @@ template<typename native_t, uint_t size>
 constexpr bool long_uint_t<native_t, size>::operator!=(const long_uint_t& that) const noexcept
 {
     return !operator==(that);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator!=(type_t value) const noexcept
+{
+    return !operator==(value);
 }
 
 
@@ -319,6 +388,60 @@ constexpr bool long_uint_t<native_t, size>::operator>=(const long_uint_t& that) 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator<(type_t value) const noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (std::is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    for (uint_t n = std::size(digits); n-- > 1;) {
+
+        if (digits[n] != extension)
+            return digits[n] < extension;
+    }
+
+    return digits[0] < native_t(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator<=(type_t value) const noexcept
+{
+    return operator<(value) || operator==(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator>(type_t value) const noexcept
+{
+    return !operator<=(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<std::is_integral_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr bool long_uint_t<native_t, size>::operator>=(type_t value) const noexcept
+{
+    return !operator<(value);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() const noexcept
 {
     long_uint_t tmp;
@@ -345,9 +468,50 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator&=(c
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator&=(type_t value) noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    digits[0] &= native_t(value);
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        digits[n] &= extension;
+
+    return *this;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator&(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) &= that;
+    long_uint_t tmp = *this;
+
+    tmp &= that;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator&(type_t value) const noexcept
+{
+    long_uint_t tmp = *this;
+
+    tmp &= value;
+
+    return tmp;
 }
 
 
@@ -366,9 +530,49 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator|=(c
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator|=(type_t value) noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    digits[0] |= native_t(value);
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        digits[n] |= extension;
+
+    return *this;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator|(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) |= that;
+    long_uint_t tmp = *this;
+    tmp |= that;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator|(type_t value) const noexcept
+{
+    long_uint_t tmp = *this;
+
+    tmp |= value;
+
+    return tmp;
 }
 
 
@@ -389,7 +593,48 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator^=(c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator^(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) ^= that;
+    long_uint_t tmp = *this;
+
+    tmp ^= that;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator^(type_t value) const noexcept
+{
+    long_uint_t tmp = *this;
+
+    tmp ^= value;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator^=(type_t value) noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    digits[0] ^= native_t(value);
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        digits[n] ^= extension;
+
+    return *this;
 }
 
 
@@ -427,7 +672,10 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator<<=(
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator<<(uint_t shift) const noexcept
 {
-    return long_uint_t(*this) <<= shift;
+    long_uint_t tmp = *this;
+    tmp <<= shift;
+
+    return tmp;
 }
 
 
@@ -465,7 +713,10 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator>>=(
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator>>(uint_t shift) const noexcept
 {
-    return long_uint_t(*this) >>= shift;
+    long_uint_t tmp = *this;
+    tmp >>= shift;
+
+    return tmp;
 }
 
 
@@ -483,9 +734,49 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator+=(c
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator+=(type_t value) noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    bool carry = add(digits[0], native_t(value));
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        carry = addc(digits[n], extension, carry);
+
+    return *this;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator+(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) += that;
+    long_uint_t tmp = *this;
+    tmp += that;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator+(type_t value) const noexcept
+{
+    long_uint_t tmp = *this;
+
+    tmp += value;
+
+    return tmp;
 }
 
 
@@ -494,7 +785,10 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator+(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator++() noexcept
 {
-    *this += 1;
+    bool carry = add(digits[0], native_t(1));
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        carry = addc(digits[n], native_t(0), carry);
 
     return *this;
 }
@@ -507,7 +801,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator++(in
 {
     long_uint_t tmp = *this;
 
-    *this += 1;
+    operator++();
 
     return tmp;
 }
@@ -536,9 +830,50 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator-=(c
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator-=(type_t value) noexcept
+{
+    native_t extension = native_t(0);
+
+    if constexpr (is_signed_v<type_t>) {
+
+        if (value < 0)
+            extension = native_t(~native_t(0));
+    }
+
+    bool borrow = sub(digits[0], native_t(value));
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        borrow = subb(digits[n], extension, borrow);
+
+    return *this;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) -= that;
+    long_uint_t tmp = *this;
+
+    tmp -= that;
+
+    return tmp;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename native_t, uint_t size>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t> && byte_count_v<type_t> <= byte_count_v<native_t>, int>>
+constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-(type_t value) const noexcept
+{
+    long_uint_t tmp = *this;
+
+    tmp -= value;
+
+    return tmp;
 }
 
 
@@ -547,7 +882,10 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator--() noexcept
 {
-    *this -= 1;
+    bool borrow = sub(digits[0], native_t(1));
+
+    for (uint_t n = 1; n < std::size(digits); ++n)
+        borrow = subb(digits[n], native_t(0), borrow);
 
     return *this;
 }
@@ -560,7 +898,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator--(in
 {
     long_uint_t tmp = *this;
 
-    *this -= 1;
+    operator--();
 
     return tmp;
 }
@@ -601,7 +939,11 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator*=(c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator*(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) *= that;
+    long_uint_t tmp = *this;
+
+    tmp *= that;
+
+    return tmp;
 }
 
 
@@ -610,8 +952,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator*(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator/=(const long_uint_t& that) noexcept
 {
-    std::optional<long_uint_t> remainder;
-    *this = divr(*this, that, remainder);
+    *this = divq(*this, that);
 
     return *this;
 }
@@ -622,7 +963,11 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator/=(c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator/(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) /= that;
+    long_uint_t tmp = *this;
+
+    tmp /= that;
+
+    return tmp;
 }
 
 
@@ -631,10 +976,9 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator/(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator%=(const long_uint_t& that) noexcept
 {
-    std::optional<long_uint_t> remainder = long_uint_t();
-    divr(*this, that, remainder);
-
-    *this = *remainder;
+    long_uint_t remainder;
+    divqr(*this, that, remainder);
+    *this = remainder;
 
     return *this;
 }
@@ -645,7 +989,11 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator%=(c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator%(const long_uint_t& that) const noexcept
 {
-    return long_uint_t(*this) %= that;
+    long_uint_t tmp = *this;
+
+    tmp %= that;
+
+    return tmp;
 }
 
 
@@ -654,7 +1002,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator%(con
 // standalone methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator==(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) == value2;
@@ -663,7 +1011,7 @@ constexpr bool operator==(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator!=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
     return long_uint_t<native_t, size>(value1) != value2;
@@ -672,64 +1020,88 @@ constexpr bool operator!=(type_t value1, const long_uint_t<native_t, size>& valu
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator<(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) < value2;
+    if constexpr (byte_count_v<type_t> <= byte_count_v<native_t>)
+        return value2 > value1;
+    else
+        return long_uint_t<native_t, size>(value1) < value2;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator<=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) <= value2;
+    if constexpr (byte_count_v<type_t> <= byte_count_v<native_t>)
+        return value2 >= value1;
+    else
+        return long_uint_t<native_t, size>(value1) <= value2;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator>(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) > value2;
+    if constexpr (byte_count_v<type_t> <= byte_count_v<native_t>)
+        return value2 < value1;
+    else
+        return long_uint_t<native_t, size>(value1) > value2;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr bool operator>=(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) >= value2;
+    if constexpr (byte_count_v<type_t> <= byte_count_v<native_t>)
+        return value2 <= value1;
+    else
+        return long_uint_t<native_t, size>(value1) >= value2;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator&(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) &= value2;
+    long_uint_t<native_t, size> tmp = value2;
+
+    tmp &= value1;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator|(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) |= value2;
+    long_uint_t<native_t, size> tmp = value2;
+
+    tmp |= value1;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator^(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) ^= value2;
+    long_uint_t<native_t, size> tmp = value2;
+
+    tmp ^= value1;
+
+    return tmp;
 }
 
 
@@ -753,46 +1125,66 @@ constexpr long_uint_t<native_t, size> operator>>(long_uint_t<native_t, size> val
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator+(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) += value2;
+    long_uint_t<native_t, size> tmp = value2;
+
+    tmp += value1;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator-(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) -= value2;
+    long_uint_t<native_t, size> tmp(value1);
+
+    tmp -= value2;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator*(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) *= value2;
+    long_uint_t<native_t, size> tmp(value1);
+
+    tmp *= value2;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator/(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) /= value2;
+    long_uint_t<native_t, size> tmp(value1);
+
+    tmp /= value2;
+
+    return tmp;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, typename native_t, uint_t size, typename std::enable_if_t<std::is_integral_v<type_t>, int> = 0>
 constexpr long_uint_t<native_t, size> operator%(type_t value1, const long_uint_t<native_t, size>& value2) noexcept
 {
-    return long_uint_t<native_t, size>(value1) %= value2;
+    long_uint_t<native_t, size> tmp(value1);
+
+    tmp %= value2;
+
+    return tmp;
 }
 
 
@@ -810,8 +1202,7 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
     if (mul_hi == 0)
         return mul_lo / divider;
 
-    std::optional<type_t> remainder;
-    return divr2(mul_hi, mul_lo, divider, remainder);
+    return divq2(mul_hi, mul_lo, divider);
 }
 
 namespace impl

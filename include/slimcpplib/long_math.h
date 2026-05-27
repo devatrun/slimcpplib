@@ -72,9 +72,11 @@ constexpr uint_t bit_count_v = byte_count_v<type_t> * std::numeric_limits<uint8_
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-constexpr bool is_unsigned_v = std::numeric_limits<type_t>::is_integer && !std::numeric_limits<type_t>::is_signed;
+constexpr bool is_integer_v = std::numeric_limits<type_t>::is_integer;
 template<typename type_t>
-constexpr bool is_signed_v = std::numeric_limits<type_t>::is_integer && std::numeric_limits<type_t>::is_signed;
+constexpr bool is_unsigned_v = is_integer_v<type_t> && !std::numeric_limits<type_t>::is_signed;
+template<typename type_t>
+constexpr bool is_signed_v = is_integer_v<type_t> && std::numeric_limits<type_t>::is_signed;
 
 
 
@@ -151,7 +153,7 @@ constexpr type_t half_make_hi(type_t value) noexcept;
 
 // return most significant bit
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int> = 0>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t>, int> = 0>
 constexpr bool sign(type_t value);
 
 // propagate most significant bit to the right
@@ -200,12 +202,16 @@ constexpr type_t mul(type_t& value1, type_t value2) noexcept;
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
 constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept;
 
-// divide with remainder
+// divide
 
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t divr(type_t value1, type_t value2, std::optional<type_t>& remainder) noexcept;
+constexpr type_t divq(type_t value1, type_t value2) noexcept;
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
-constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::optional<type_t>& remainder) noexcept;
+constexpr type_t divqr(type_t value1, type_t value2, type_t& remainder) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t divq2(type_t value1_hi, type_t value1_lo, type_t value2) noexcept;
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+constexpr type_t divqr2(type_t value1_hi, type_t value1_lo, type_t value2, type_t& remainder) noexcept;
 
 
 
@@ -240,7 +246,7 @@ constexpr type_t half_make_hi(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t> || is_signed_v<type_t>, int>>
+template<typename type_t, std::enable_if_t<is_integer_v<type_t>, int>>
 constexpr bool sign(type_t value)
 {
     return make_signed_t<type_t>(value) < 0;
@@ -476,12 +482,19 @@ constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t divr(type_t value1, type_t value2, std::optional<type_t>& remainder) noexcept
+constexpr type_t divq(type_t value1, type_t value2) noexcept
 {
-    type_t quotient = value1 / value2;
+    return value1 / value2;
+}
 
-    if (remainder)
-        remainder = static_cast<type_t>(value1 - quotient * value2);
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr type_t divqr(type_t value1, type_t value2, type_t& remainder) noexcept
+{
+    const type_t quotient = value1 / value2;
+    remainder = static_cast<type_t>(value1 - quotient * value2);
 
     return quotient;
 }
@@ -490,12 +503,64 @@ constexpr type_t divr(type_t value1, type_t value2, std::optional<type_t>& remai
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
-constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::optional<type_t>& remainder) noexcept
+constexpr type_t divq2(type_t value1_hi, type_t value1_lo, type_t value2) noexcept
+{
+    if (value2 != 0 && value1_hi >= value2)
+        return type_t(~type_t(0));
+
+    const uint_t shift = nlz(value2);
+    const type_t svalue2 = value2 << shift;
+
+    const type_t nvalue2_hi = half_hi(svalue2);
+    const type_t nvalue2_lo = half_lo(svalue2);
+
+    const type_t nvalue1_32 = shl2(value1_hi, value1_lo, shift);
+    const type_t nvalue1_10 = value1_lo << shift;
+
+    const type_t nvalue1_hi = half_hi(nvalue1_10);
+    const type_t nvalue1_lo = half_lo(nvalue1_10);
+
+    type_t remainder_hi;
+    type_t quotient_hi = divqr(nvalue1_32, nvalue2_hi, remainder_hi);
+
+    const type_t t1 = quotient_hi * nvalue2_lo;
+    const type_t t2 = half_make_hi(remainder_hi) | nvalue1_hi;
+
+    if (t1 > t2) {
+
+        --quotient_hi;
+
+        if (t1 - t2 > svalue2)
+            --quotient_hi;
+    }
+
+    const type_t nvalue1_21 = half_make_hi(nvalue1_32) + nvalue1_hi - quotient_hi * svalue2;
+
+    type_t remainder_lo;
+    type_t quotient_lo = divqr(nvalue1_21, nvalue2_hi, remainder_lo);
+
+    const type_t t3 = quotient_lo * nvalue2_lo;
+    const type_t t4 = half_make_hi(remainder_lo) | nvalue1_lo;
+
+    if (t3 > t4) {
+
+        --quotient_lo;
+
+        if (t3 - t4 > svalue2)
+            --quotient_lo;
+    }
+
+    return half_make_hi(quotient_hi) | quotient_lo;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+constexpr type_t divqr2(type_t value1_hi, type_t value1_lo, type_t value2, type_t& remainder) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {
-
-        if (remainder)
-            remainder = type_t(~type_t(0));
+        remainder = type_t(~type_t(0));
 
         return type_t(~type_t(0));
     }
@@ -512,11 +577,11 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
     const type_t nvalue1_hi = half_hi(nvalue1_10);
     const type_t nvalue1_lo = half_lo(nvalue1_10);
 
-    std::optional<type_t> remainder_hi = type_t();
-    type_t quotient_hi = divr(nvalue1_32, nvalue2_hi, remainder_hi);
+    type_t remainder_hi;
+    type_t quotient_hi = divqr(nvalue1_32, nvalue2_hi, remainder_hi);
 
     const type_t t1 = quotient_hi * nvalue2_lo;
-    const type_t t2 = half_make_hi(*remainder_hi) | nvalue1_hi;
+    const type_t t2 = half_make_hi(remainder_hi) | nvalue1_hi;
 
     if (t1 > t2) {
 
@@ -528,11 +593,11 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
 
     const type_t nvalue1_21 = half_make_hi(nvalue1_32) + nvalue1_hi - quotient_hi * svalue2;
 
-    std::optional<type_t> remainder_lo = type_t();
-    type_t quotient_lo = divr(nvalue1_21, nvalue2_hi, remainder_lo);
+    type_t remainder_lo;
+    type_t quotient_lo = divqr(nvalue1_21, nvalue2_hi, remainder_lo);
 
     const type_t t3 = quotient_lo * nvalue2_lo;
-    const type_t t4 = half_make_hi(*remainder_lo) | nvalue1_lo;
+    const type_t t4 = half_make_hi(remainder_lo) | nvalue1_lo;
 
     if (t3 > t4) {
 
@@ -542,12 +607,14 @@ constexpr type_t divr2(type_t value1_hi, type_t value1_lo, type_t value2, std::o
             --quotient_lo;
     }
 
-    if (remainder)
-        remainder = static_cast<type_t>((half_make_hi(nvalue1_21) + nvalue1_lo - quotient_lo * svalue2) >> shift);
+    remainder = static_cast<type_t>((half_make_hi(nvalue1_21) + nvalue1_lo - quotient_lo * svalue2) >> shift);
 
     return half_make_hi(quotient_hi) | quotient_lo;
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 } // namespace slim
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
