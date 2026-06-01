@@ -137,8 +137,9 @@ constexpr long_fixed_divider<type_t> long_fixed_divider<type_t>::create(const ty
     if (divider == 0 || (divider & (divider - 1)) != 0) {
 
         const type_t one = type_t(1) << shift;
-        type_t reminder;
-        multiplier = divqr2(one, type_t(0), divider, reminder);
+        type_t dividend_lo = type_t(0);
+        const type_t reminder = divr2(one, dividend_lo, divider);
+        multiplier = dividend_lo;
 
         const type_t error = divider - reminder;
 

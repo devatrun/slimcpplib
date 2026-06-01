@@ -308,7 +308,7 @@ inline void write_unsigned_integer(std::basic_ostream<char_t, traits_t>& stream,
 
         while (remainder != 0) {
 
-            remainder = divqr(remainder, long_uint_t(traits.chunk_base), chunk);
+            chunk = divr(remainder, long_uint_t(traits.chunk_base));
             native_t chunk_value = static_cast<native_t>(chunk);
             uint_t digit_count = traits.digits_per_chunk;
 

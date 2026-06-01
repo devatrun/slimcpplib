@@ -378,9 +378,11 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
 // divide
 
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divq(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+constexpr void div(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divqr(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, long_uint_t<type_t, size>& remainder) noexcept;
+constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
 
 // negate vector
 
@@ -401,6 +403,8 @@ constexpr void sub(type_t& value1, const type_t& value2) noexcept;
 
 template<typename value_t, std::enable_if_t<is_unsigned_array_v<value_t>, int> = 0>
 constexpr value_t mul(value_t& value1, const value_t& value2) noexcept;
+template<typename value_t, std::enable_if_t<is_unsigned_array_v<value_t>, int> = 0>
+constexpr void mul_lo(value_t& value1, const value_t& value2) noexcept;
 
 
 
@@ -574,7 +578,7 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divq(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+constexpr void div(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
 {
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
@@ -593,25 +597,33 @@ constexpr long_uint_t<type_t, size> divq(const long_uint_t<type_t, size>& value1
 
         if (divider_lo > dividend_hi) {
 
-            if (dividend_hi == 0)
-                quotient_lo = divq<half_uint_t>(dividend_lo, divider_lo);
-            else
-                quotient_lo = divq2<half_uint_t>(dividend_hi, dividend_lo, divider_lo);
+            if (dividend_hi == 0) {
+                quotient_lo = dividend_lo;
+                div(quotient_lo, divider_lo);
+            } else {
+                quotient_lo = dividend_lo;
+                div2<half_uint_t>(dividend_hi, quotient_lo, divider_lo);
+            }
 
             quotient_hi = 0;
 
         } else {
 
-            quotient_lo = divq2<half_uint_t>(dividend_hi % divider_lo, dividend_lo, divider_lo);
-            quotient_hi = dividend_hi / divider_lo;
+            quotient_lo = dividend_lo;
+            div2<half_uint_t>(dividend_hi % divider_lo, quotient_lo, divider_lo);
+
+            quotient_hi = dividend_hi;
+            div(quotient_hi, divider_lo);
         }
 
         quotient = half_make(quotient_hi, quotient_lo);
 
-    } else
-        quotient = divq2<long_uint_t>(0, value1, value2);
-    
-    return quotient;
+    } else {
+        quotient = value1;
+        div2<long_uint_t>(0, quotient, value2);
+    }
+
+    value1 = quotient;
 }
 
 
@@ -622,7 +634,7 @@ constexpr long_uint_t<type_t, size> divq(const long_uint_t<type_t, size>& value1
 #pragma warning(disable : 4724)
 
 template<typename type_t, uint_t size>
-constexpr long_uint_t<type_t, size> divqr(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, long_uint_t<type_t, size>& remainder) noexcept
+constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
 {
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
@@ -642,28 +654,81 @@ constexpr long_uint_t<type_t, size> divqr(const long_uint_t<type_t, size>& value
 
         if (divider_lo > dividend_hi) {
 
-            if (dividend_hi == 0)
-                quotient_lo = divqr<half_uint_t>(dividend_lo, divider_lo, remainder_lo);
-            else
-                quotient_lo = divqr2<half_uint_t>(dividend_hi, dividend_lo, divider_lo, remainder_lo);
+            if (dividend_hi == 0) {
+                quotient_lo = dividend_lo;
+                remainder_lo = divr(quotient_lo, divider_lo);
+            } else {
+                quotient_lo = dividend_lo;
+                remainder_lo = divr2<half_uint_t>(dividend_hi, quotient_lo, divider_lo);
+            }
 
             quotient_hi = 0;
 
         } else {
-            quotient_lo = divqr2<half_uint_t>(dividend_hi % divider_lo, dividend_lo, divider_lo, remainder_lo);
-            quotient_hi = dividend_hi / divider_lo;
+            quotient_lo = dividend_lo;
+            remainder_lo = divr2<half_uint_t>(dividend_hi % divider_lo, quotient_lo, divider_lo);
+
+            quotient_hi = dividend_hi;
+            div(quotient_hi, divider_lo);
         }
 
         quotient = half_make(quotient_hi, quotient_lo);
-        remainder = half_make(half_uint_t(0), remainder_lo);
+        value1 = quotient;
 
-    } else
-        quotient = divqr2<long_uint_t>(0, value1, value2, remainder);
-    
-    return quotient;
+        return half_make(half_uint_t(0), remainder_lo);
+
+    } else {
+        quotient = value1;
+        const long_uint_t remainder = divr2<long_uint_t>(0, quotient, value2);
+        value1 = quotient;
+
+        return remainder;
+    }
 }
 
 #pragma warning(pop)
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+    using half_uint_t = half_t<long_uint_t>;
+
+    const half_uint_t dividend_lo = half_lo(value1);
+    const half_uint_t dividend_hi = half_hi(value1);
+    const half_uint_t divider_lo = half_lo(value2);
+    const half_uint_t divider_hi = half_hi(value2);
+
+    if (divider_hi == 0) {
+
+        half_uint_t remainder_lo;
+
+        if (divider_lo > dividend_hi) {
+
+            remainder_lo = dividend_lo;
+
+            if (dividend_hi == 0)
+                mod(remainder_lo, divider_lo);
+            else
+                mod2<half_uint_t>(dividend_hi, remainder_lo, divider_lo);
+
+        } else {
+
+            half_uint_t remainder_hi = dividend_hi;
+            mod(remainder_hi, divider_lo);
+
+            remainder_lo = dividend_lo;
+            mod2<half_uint_t>(remainder_hi, remainder_lo, divider_lo);
+        }
+
+        value1 = half_make(half_uint_t(0), remainder_lo);
+
+    } else
+        mod2<long_uint_t>(0, value1, value2);
+}
 
 
 
@@ -709,12 +774,12 @@ constexpr void sub(type_t& value1, const type_t& value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename value_t, std::enable_if_t<is_unsigned_array_v<value_t>, int>>
-constexpr value_t mul(value_t& value1, const value_t& value2) noexcept
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr type_t mul(type_t& value1, const type_t& value2) noexcept
 {
-    using native_t = typename value_t::value_type;
+    using native_t = typename type_t::value_type;
 
-    std::array<native_t, std::tuple_size_v<value_t> * 2> result = {};
+    std::array<native_t, std::tuple_size_v<type_t> * 2> result = {};
 
     for (uint_t value2_idx = 0; value2_idx < std::size(value2); ++value2_idx) {
 
@@ -733,7 +798,7 @@ constexpr value_t mul(value_t& value1, const value_t& value2) noexcept
         }
     }
 
-    value_t carry;
+    type_t carry;
 
     for (uint_t n = 0; n < std::size(value1); ++n) {
 
@@ -742,6 +807,44 @@ constexpr value_t mul(value_t& value1, const value_t& value2) noexcept
     }
 
     return carry;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
+constexpr void mul_lo(type_t& value1, const type_t& value2) noexcept
+{
+    using native_t = typename type_t::value_type;
+
+    std::array<native_t, std::tuple_size_v<type_t>> result = {};
+
+    for (uint_t value2_idx = 0; value2_idx < std::size(value2); ++value2_idx) {
+
+        for (uint_t value1_idx = 0; value1_idx < std::size(value1); ++value1_idx) {
+
+            native_t product_lo = value1[value1_idx];
+            const native_t product_hi = mul(product_lo, value2[value2_idx]);
+
+            const uint_t result_idx = value1_idx + value2_idx;
+
+            if (result_idx < std::size(result)) {
+
+                bool carry = add(result[result_idx], product_lo);
+
+                if (result_idx < std::size(result) - 1) {
+
+                    carry = addc(result[result_idx + 1], product_hi, carry);
+
+                    for (uint_t n = result_idx + 2; carry && n < std::size(result); ++n)
+                        carry = add(result[n], native_t(1));
+                }
+            }
+        }
+    }
+
+    for (uint_t n = 0; n < std::size(value1); ++n)
+        value1[n] = result[n];
 }
 
 } // namespace slim

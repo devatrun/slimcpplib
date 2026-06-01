@@ -928,7 +928,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator*=(const long_uint_t& that) noexcept
 {
-    mul(digits, that.digits);
+    mul_lo(digits, that.digits);
 
     return *this;
 }
@@ -952,7 +952,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator*(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator/=(const long_uint_t& that) noexcept
 {
-    *this = divq(*this, that);
+    div(*this, that);
 
     return *this;
 }
@@ -976,9 +976,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator/(con
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator%=(const long_uint_t& that) noexcept
 {
-    long_uint_t remainder;
-    divqr(*this, that, remainder);
-    *this = remainder;
+    mod(*this, that);
 
     return *this;
 }
@@ -1200,9 +1198,11 @@ constexpr type_t muldiv(const type_t& value, const type_t& multiplier, const typ
     const type_t mul_hi = mul(mul_lo, multiplier);
 
     if (mul_hi == 0)
-        return mul_lo / divider;
+        div(mul_lo, divider);
+    else
+        div2(mul_hi, mul_lo, divider);
 
-    return divq2(mul_hi, mul_lo, divider);
+    return mul_lo;
 }
 
 namespace impl
