@@ -37,6 +37,7 @@
 #include <cstdint>
 
 #include <array>
+#include <concepts>
 #include <limits>
 #include <optional>
 #include <type_traits>
@@ -68,28 +69,44 @@ constexpr uint_t bit_count_v = byte_count_v<type_t> * std::numeric_limits<uint8_
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// is_unsigned_v and is_signed_v
+// concepts
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// integer type supported by library numeric limits
 template<typename type_t>
-constexpr bool is_integer_v = std::numeric_limits<type_t>::is_integer;
+concept integer_type = std::numeric_limits<type_t>::is_integer;
+
+// unsigned integer type supported by library numeric limits
 template<typename type_t>
-constexpr bool is_unsigned_v = is_integer_v<type_t> && !std::numeric_limits<type_t>::is_signed;
+concept unsigned_type = integer_type<type_t> && !std::numeric_limits<type_t>::is_signed;
+
+// signed integer type supported by library numeric limits
 template<typename type_t>
-constexpr bool is_signed_v = is_integer_v<type_t> && std::numeric_limits<type_t>::is_signed;
+concept signed_type = integer_type<type_t> && std::numeric_limits<type_t>::is_signed;
 
+// compiler-native integral type
+template<typename native_t>
+concept native_type = std::integral<native_t>;
 
+// compiler-native integral type except bool
+template<typename native_t>
+concept native_integer_type = native_type<native_t> && !std::same_as<native_t, bool>;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// is_unsigned_array_v
-////////////////////////////////////////////////////////////////////////////////////////////////////
+// unsigned compiler-native integral type
+template<typename native_t>
+concept unsigned_native_type = native_type<native_t> && unsigned_type<native_t>;
 
-template<typename type_t>
-constexpr bool is_unsigned_array_v = false;
-template<typename type_t, uint_t size>
-constexpr bool is_unsigned_array_v<std::array<type_t, size>> = is_unsigned_v<type_t>;
-template<typename type_t, uint_t size>
-constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned_v<type_t>;
+// signed compiler-native integral type
+template<typename native_t>
+concept signed_native_type = native_type<native_t> && signed_type<native_t>;
+
+// compiler-native integral type that fits into native word
+template<typename native_t, typename word_t>
+concept native_sized_type = native_type<native_t> && byte_count_v<native_t> <= byte_count_v<word_t>;
+
+// library integer type that fits into native word
+template<typename type_t, typename word_t>
+concept sized_integer_type = integer_type<type_t> && byte_count_v<type_t> <= byte_count_v<word_t>;
 
 
 
@@ -98,8 +115,11 @@ constexpr bool is_unsigned_array_v<const std::array<type_t, size>> = is_unsigned
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-struct make_unsigned {
-    using type = typename std::make_unsigned<type_t>::type;
+struct make_unsigned;
+
+template<native_integer_type native_t>
+struct make_unsigned<native_t> {
+    using type = std::make_unsigned_t<native_t>;
 };
 template<typename type_t>
 using make_unsigned_t = typename make_unsigned<type_t>::type;
@@ -111,8 +131,11 @@ using make_unsigned_t = typename make_unsigned<type_t>::type;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-struct make_signed {
-    using type = typename std::make_signed<type_t>::type;
+struct make_signed;
+
+template<native_integer_type native_t>
+struct make_signed<native_t> {
+    using type = std::make_signed_t<native_t>;
 };
 template<typename type_t>
 using make_signed_t = typename make_signed<type_t>::type;
@@ -124,8 +147,11 @@ using make_signed_t = typename make_signed<type_t>::type;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<typename type_t>
-struct half_type {
-    using type = type_t;
+struct half_type;
+
+template<native_integer_type native_t>
+struct half_type<native_t> {
+    using type = native_t;
 };
 template<typename type_t>
 using half_t = typename half_type<type_t>::type;
@@ -138,83 +164,84 @@ using half_t = typename half_type<type_t>::type;
 
 // extract low half of unsigned integer
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t half_lo(type_t value) noexcept;
 
 // extract high half of unsigned integer
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t half_hi(type_t value) noexcept;
 
 // move low half to high
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t half_make_hi(type_t value) noexcept;
 
 // return most significant bit
 
-template<typename type_t, std::enable_if_t<is_integer_v<type_t>, int> = 0>
+template<integer_type type_t>
 constexpr bool sign(type_t value);
 
 // propagate most significant bit to the right
 
-template<typename type_t, uint_t byte_count = byte_count_v<type_t>, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<typename type_t, uint_t byte_count = byte_count_v<type_t>>
+requires unsigned_type<type_t>
 constexpr type_t pmsbr(type_t value) noexcept;
 
 // calculate number of set bits
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr uint_t popcnt(type_t value) noexcept;
 
 // calculate leading zero bits
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr uint_t nlz(type_t value) noexcept;
 
 // shift bits to the left
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // shift bits to the right
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // add with carry
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr bool add(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept;
 
 // subtract with borrow
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr bool sub(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept;
 
 // multiply with carry
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t mul(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept;
 
-// divide
+// divide with remainder
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr void div(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t divr(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr void mod(type_t& value1, type_t value2) noexcept;
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<unsigned_type type_t>
 constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
 
 
@@ -223,7 +250,7 @@ constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t half_lo(type_t value) noexcept
 {
     return value & (type_t(~type_t(0)) >> (bit_count_v<type_t> / 2));
@@ -232,7 +259,7 @@ constexpr type_t half_lo(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t half_hi(type_t value) noexcept
 {
     return value >> (bit_count_v<type_t> / 2);
@@ -241,7 +268,7 @@ constexpr type_t half_hi(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t half_make_hi(type_t value) noexcept
 {
     return value << (bit_count_v<type_t> / 2);
@@ -250,7 +277,7 @@ constexpr type_t half_make_hi(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_integer_v<type_t>, int>>
+template<integer_type type_t>
 constexpr bool sign(type_t value)
 {
     return make_signed_t<type_t>(value) < 0;
@@ -259,7 +286,8 @@ constexpr bool sign(type_t value)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t byte_count, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<typename type_t, uint_t byte_count>
+requires unsigned_type<type_t>
 constexpr type_t pmsbr(type_t value) noexcept
 {
     if constexpr (byte_count == 1) {
@@ -280,7 +308,8 @@ constexpr type_t pmsbr(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t bit_count = bit_count_v<type_t>, uint_t mask_count = bit_count_v<type_t> / bit_count, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<typename type_t, uint_t bit_count = bit_count_v<type_t>, uint_t mask_count = bit_count_v<type_t> / bit_count>
+requires unsigned_type<type_t>
 constexpr type_t popcnt_msk() noexcept
 {
     if constexpr (mask_count == 1) {
@@ -297,7 +326,8 @@ constexpr type_t popcnt_msk() noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, uint_t byte_count = byte_count_v<type_t>, std::enable_if_t<is_unsigned_v<type_t>, int> = 0>
+template<typename type_t, uint_t byte_count = byte_count_v<type_t>>
+requires unsigned_type<type_t>
 constexpr type_t popcnt_impl(type_t value) noexcept
 {
     if constexpr (byte_count <= 4) {
@@ -327,7 +357,7 @@ constexpr type_t popcnt_impl(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr uint_t popcnt(type_t value) noexcept
 {
     return static_cast<uint_t>(popcnt_impl<type_t>(value) & ((bit_count_v<type_t> << 2) - 1));
@@ -336,7 +366,7 @@ constexpr uint_t popcnt(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr uint_t nlz(type_t value) noexcept
 {
     return bit_count_v<type_t> - popcnt(pmsbr(value));
@@ -345,7 +375,7 @@ constexpr uint_t nlz(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     const type_t result_lo = value_lo;
@@ -365,7 +395,7 @@ constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     type_t result_lo = value_lo;
@@ -385,7 +415,7 @@ constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr bool add(type_t& value1, type_t value2) noexcept
 {
     value1 += value2;
@@ -395,7 +425,7 @@ constexpr bool add(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept
 {
     value1 += value2;
@@ -409,7 +439,7 @@ constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr bool sub(type_t& value1, type_t value2) noexcept
 {
     const type_t tmp = value1;
@@ -420,7 +450,7 @@ constexpr bool sub(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept
 {
     type_t tmp = value1;
@@ -436,7 +466,7 @@ constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t mul(type_t& value1, type_t value2) noexcept
 {
     const type_t value1_lo = half_lo(value1);
@@ -460,7 +490,7 @@ constexpr type_t mul(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 {
     const type_t value1_lo = half_lo(value1);
@@ -485,7 +515,7 @@ constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr void div(type_t& value1, type_t value2) noexcept
 {
     value1 /= value2;
@@ -494,7 +524,7 @@ constexpr void div(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t divr(type_t& value1, type_t value2) noexcept
 {
     const type_t dividend = value1;
@@ -507,7 +537,7 @@ constexpr type_t divr(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {
@@ -564,7 +594,7 @@ constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {
@@ -626,7 +656,7 @@ constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexc
 #pragma warning(push)
 #pragma warning(disable : 4724)
 
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr void mod(type_t& value1, type_t value2) noexcept
 {
     value1 %= value2;
@@ -637,7 +667,7 @@ constexpr void mod(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_v<type_t>, int>>
+template<unsigned_type type_t>
 constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {

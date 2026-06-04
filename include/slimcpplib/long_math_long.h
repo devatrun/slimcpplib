@@ -32,17 +32,9 @@
 
 #pragma once
 
-#include "long_math.h"
+#include "long_math_array.h"
 
 #include <functional>
-
-#if __has_include("long_math_gcc.h")
-#include "long_math_gcc.h"
-#endif // __has_include("long_math_gcc.h")
-
-#if __has_include("long_math_msvc.h")
-#include "long_math_msvc.h"
-#endif // __has_include("long_math_msvc.h")
 
 namespace slim
 {
@@ -384,27 +376,6 @@ constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size>& value1, cons
 template<typename type_t, uint_t size>
 constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
 
-// negate vector
-
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void negate(type_t& value) noexcept;
-
-// add two vectors
-
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void add(type_t& value1, const type_t& value2) noexcept;
-
-// subtract two vectors
-
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int> = 0>
-constexpr void sub(type_t& value1, const type_t& value2) noexcept;
-
-// multiply two vectors
-
-template<typename value_t, std::enable_if_t<is_unsigned_array_v<value_t>, int> = 0>
-constexpr value_t mul(value_t& value1, const value_t& value2) noexcept;
-template<typename value_t, std::enable_if_t<is_unsigned_array_v<value_t>, int> = 0>
-constexpr void mul_lo(value_t& value1, const value_t& value2) noexcept;
 
 
 
@@ -550,7 +521,13 @@ constexpr uint_t nlz(const long_uint_t<type_t, size>& value) noexcept
 template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> mul(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
 {
-    return mul(value1.digits, value2.digits);
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    long_uint_t carry;
+
+    array::mul(std::span(value1.digits), std::span(value2.digits), std::span(carry.digits));
+
+    return carry;
 }
 
 
@@ -561,7 +538,8 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
 {
     using long_uint_t = long_uint_t<type_t, size>;
 
-    long_uint_t carry_hi = mul(value1.digits, value2.digits);
+    long_uint_t carry_hi;
+    array::mul(std::span(value1.digits), std::span(value2.digits), std::span(carry_hi.digits));
 
     bool add_carry = false;
 
@@ -731,121 +709,6 @@ constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, 
 }
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void negate(type_t& value) noexcept
-{
-    using value_t = typename type_t::value_type;
-
-    bool borrow = true;
-
-    for (uint_t n = 0; n < std::size(value); ++n) {
-
-        borrow = subb(value[n], value_t(0), borrow);
-        value[n] = ~value[n];
-    }
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void add(type_t& value1, const type_t& value2) noexcept
-{
-    bool carry = add(value1[0], value2[0]);
-
-    for (uint_t n = 1; n < std::size(value1); ++n)
-        carry = addc(value1[n], value2[n], carry);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void sub(type_t& value1, const type_t& value2) noexcept
-{
-    bool borrow = sub(value1[0], value2[0]);
-
-    for (uint_t n = 1; n < std::size(value1); ++n)
-        borrow = subb(value1[n], value2[n], borrow);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr type_t mul(type_t& value1, const type_t& value2) noexcept
-{
-    using native_t = typename type_t::value_type;
-
-    std::array<native_t, std::tuple_size_v<type_t> * 2> result = {};
-
-    for (uint_t value2_idx = 0; value2_idx < std::size(value2); ++value2_idx) {
-
-        for (uint_t value1_idx = 0; value1_idx < std::size(value1); ++value1_idx) {
-
-            const uint_t result_idx = value1_idx + value2_idx;
-
-            native_t product_lo = value1[value1_idx];
-            const native_t product_hi = mul(product_lo, value2[value2_idx]);
-
-            bool carry = add(result[result_idx], product_lo);
-            carry = addc(result[result_idx + 1], product_hi, carry);
-
-            for (uint_t n = result_idx + 2; carry && n < std::size(result); ++n)
-                carry = add(result[n], native_t(1));
-        }
-    }
-
-    type_t carry;
-
-    for (uint_t n = 0; n < std::size(value1); ++n) {
-
-        value1[n] = result[n];
-        carry[n] = result[n + std::size(value1)];
-    }
-
-    return carry;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-template<typename type_t, std::enable_if_t<is_unsigned_array_v<type_t>, int>>
-constexpr void mul_lo(type_t& value1, const type_t& value2) noexcept
-{
-    using native_t = typename type_t::value_type;
-
-    std::array<native_t, std::tuple_size_v<type_t>> result = {};
-
-    for (uint_t value2_idx = 0; value2_idx < std::size(value2); ++value2_idx) {
-
-        for (uint_t value1_idx = 0; value1_idx < std::size(value1); ++value1_idx) {
-
-            native_t product_lo = value1[value1_idx];
-            const native_t product_hi = mul(product_lo, value2[value2_idx]);
-
-            const uint_t result_idx = value1_idx + value2_idx;
-
-            if (result_idx < std::size(result)) {
-
-                bool carry = add(result[result_idx], product_lo);
-
-                if (result_idx < std::size(result) - 1) {
-
-                    carry = addc(result[result_idx + 1], product_hi, carry);
-
-                    for (uint_t n = result_idx + 2; carry && n < std::size(result); ++n)
-                        carry = add(result[n], native_t(1));
-                }
-            }
-        }
-    }
-
-    for (uint_t n = 0; n < std::size(value1); ++n)
-        value1[n] = result[n];
-}
 
 } // namespace slim
 

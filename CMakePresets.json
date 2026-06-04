@@ -1,0 +1,267 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "x86-debug",
+            "displayName": "x86 Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "architecture": {
+                "value": "Win32",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "win32"
+                }
+            }
+        },
+        {
+            "name": "x86-release",
+            "displayName": "x86 Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "architecture": {
+                "value": "Win32",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "win32"
+                }
+            }
+        },
+        {
+            "name": "x64-debug",
+            "displayName": "x64 Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "x64"
+                }
+            }
+        },
+        {
+            "name": "x64-release",
+            "displayName": "x64 Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "x64"
+                }
+            }
+        },
+        {
+            "name": "x64-release-with-debug_info",
+            "displayName": "x64 Release With Debug Info",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "x64"
+                }
+            }
+        },
+        {
+            "name": "wsl-gcc-debug",
+            "displayName": "WSL GCC Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "linux-gcc"
+                }
+            }
+        },
+        {
+            "name": "wsl-gcc-release",
+            "displayName": "WSL GCC Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "linux-gcc"
+                }
+            }
+        },
+        {
+            "name": "wsl-clang-debug",
+            "displayName": "WSL Clang Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "linux-clang"
+                }
+            }
+        },
+        {
+            "name": "wsl-clang-release",
+            "displayName": "WSL Clang Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "ARCHITECTURE": {
+                    "type": "STRING",
+                    "value": "linux-clang"
+                }
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "x86-debug",
+            "configurePreset": "x86-debug"
+        },
+        {
+            "name": "x86-release",
+            "configurePreset": "x86-release"
+        },
+        {
+            "name": "x64-debug",
+            "configurePreset": "x64-debug"
+        },
+        {
+            "name": "x64-release",
+            "configurePreset": "x64-release"
+        },
+        {
+            "name": "x64-release-with-debug_info",
+            "configurePreset": "x64-release-with-debug_info"
+        },
+        {
+            "name": "wsl-gcc-debug",
+            "configurePreset": "wsl-gcc-debug"
+        },
+        {
+            "name": "wsl-gcc-release",
+            "configurePreset": "wsl-gcc-release"
+        },
+        {
+            "name": "wsl-clang-debug",
+            "configurePreset": "wsl-clang-debug"
+        },
+        {
+            "name": "wsl-clang-release",
+            "configurePreset": "wsl-clang-release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "x86-debug",
+            "configurePreset": "x86-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x86-release",
+            "configurePreset": "x86-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-debug",
+            "configurePreset": "x64-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-release",
+            "configurePreset": "x64-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x64-release-with-debug_info",
+            "configurePreset": "x64-release-with-debug_info",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "wsl-gcc-debug",
+            "configurePreset": "wsl-gcc-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "wsl-gcc-release",
+            "configurePreset": "wsl-gcc-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "wsl-clang-debug",
+            "configurePreset": "wsl-clang-debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "wsl-clang-release",
+            "configurePreset": "wsl-clang-release",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}
