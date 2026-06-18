@@ -164,17 +164,17 @@ using half_t = typename half_type<type_t>::type;
 
 // extract low half of unsigned integer
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_lo(type_t value) noexcept;
 
 // extract high half of unsigned integer
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_hi(type_t value) noexcept;
 
 // move low half to high
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_make_hi(type_t value) noexcept;
 
 // return most significant bit
@@ -185,63 +185,81 @@ constexpr bool sign(type_t value);
 // propagate most significant bit to the right
 
 template<typename type_t, uint_t byte_count = byte_count_v<type_t>>
-requires unsigned_type<type_t>
+requires unsigned_native_type<type_t>
 constexpr type_t pmsbr(type_t value) noexcept;
 
 // calculate number of set bits
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr uint_t popcnt(type_t value) noexcept;
 
 // calculate leading zero bits
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr uint_t nlz(type_t value) noexcept;
+
+// bit operations
+
+template<unsigned_native_type type_t>
+constexpr void bit_not(type_t& value1, type_t value2) noexcept;
+template<unsigned_native_type type_t>
+constexpr void bit_and(type_t& value1, type_t value2) noexcept;
+template<unsigned_native_type type_t>
+constexpr void bit_or(type_t& value1, type_t value2) noexcept;
+template<unsigned_native_type type_t>
+constexpr void bit_xor(type_t& value1, type_t value2) noexcept;
+
+// compare values
+
+template<unsigned_native_type type_t>
+constexpr bool cmp_equal(type_t value1, type_t value2) noexcept;
+template<unsigned_native_type type_t>
+constexpr bool cmp_less(type_t value1, type_t value2) noexcept;
 
 // shift bits to the left
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // shift bits to the right
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept;
 
 // add with carry
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool add(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept;
 
 // subtract with borrow
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool sub(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept;
 
 // multiply with carry
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t mul(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept;
 
 // divide with remainder
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void div(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t divr(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void mod(type_t& value1, type_t value2) noexcept;
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept;
 
 
@@ -250,7 +268,7 @@ constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 // standalone routines
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_lo(type_t value) noexcept
 {
     return value & (type_t(~type_t(0)) >> (bit_count_v<type_t> / 2));
@@ -259,7 +277,7 @@ constexpr type_t half_lo(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_hi(type_t value) noexcept
 {
     return value >> (bit_count_v<type_t> / 2);
@@ -268,7 +286,7 @@ constexpr type_t half_hi(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t half_make_hi(type_t value) noexcept
 {
     return value << (bit_count_v<type_t> / 2);
@@ -287,7 +305,7 @@ constexpr bool sign(type_t value)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t byte_count>
-requires unsigned_type<type_t>
+requires unsigned_native_type<type_t>
 constexpr type_t pmsbr(type_t value) noexcept
 {
     if constexpr (byte_count == 1) {
@@ -309,7 +327,7 @@ constexpr type_t pmsbr(type_t value) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t bit_count = bit_count_v<type_t>, uint_t mask_count = bit_count_v<type_t> / bit_count>
-requires unsigned_type<type_t>
+requires unsigned_native_type<type_t>
 constexpr type_t popcnt_msk() noexcept
 {
     if constexpr (mask_count == 1) {
@@ -327,7 +345,7 @@ constexpr type_t popcnt_msk() noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t byte_count = byte_count_v<type_t>>
-requires unsigned_type<type_t>
+requires unsigned_native_type<type_t>
 constexpr type_t popcnt_impl(type_t value) noexcept
 {
     if constexpr (byte_count <= 4) {
@@ -357,7 +375,7 @@ constexpr type_t popcnt_impl(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr uint_t popcnt(type_t value) noexcept
 {
     return static_cast<uint_t>(popcnt_impl<type_t>(value) & ((bit_count_v<type_t> << 2) - 1));
@@ -366,7 +384,7 @@ constexpr uint_t popcnt(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr uint_t nlz(type_t value) noexcept
 {
     return bit_count_v<type_t> - popcnt(pmsbr(value));
@@ -375,7 +393,61 @@ constexpr uint_t nlz(type_t value) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
+constexpr void bit_not(type_t& value1, type_t value2) noexcept
+{
+    value1 = ~value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
+constexpr void bit_and(type_t& value1, type_t value2) noexcept
+{
+    value1 &= value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
+constexpr void bit_or(type_t& value1, type_t value2) noexcept
+{
+    value1 |= value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
+constexpr void bit_xor(type_t& value1, type_t value2) noexcept
+{
+    value1 ^= value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
+constexpr bool cmp_equal(type_t value1, type_t value2) noexcept
+{
+    return value1 == value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
+constexpr bool cmp_less(type_t value1, type_t value2) noexcept
+{
+    return value1 < value2;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<unsigned_native_type type_t>
 constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     const type_t result_lo = value_lo;
@@ -395,7 +467,7 @@ constexpr type_t shl2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 {
     type_t result_lo = value_lo;
@@ -415,7 +487,7 @@ constexpr type_t shr2(type_t value_hi, type_t value_lo, uint_t shift) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool add(type_t& value1, type_t value2) noexcept
 {
     value1 += value2;
@@ -425,7 +497,7 @@ constexpr bool add(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept
 {
     value1 += value2;
@@ -439,7 +511,7 @@ constexpr bool addc(type_t& value1, type_t value2, bool carry) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool sub(type_t& value1, type_t value2) noexcept
 {
     const type_t tmp = value1;
@@ -450,7 +522,7 @@ constexpr bool sub(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept
 {
     type_t tmp = value1;
@@ -466,7 +538,7 @@ constexpr bool subb(type_t& value1, type_t value2, bool borrow) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t mul(type_t& value1, type_t value2) noexcept
 {
     const type_t value1_lo = half_lo(value1);
@@ -490,7 +562,7 @@ constexpr type_t mul(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 {
     const type_t value1_lo = half_lo(value1);
@@ -515,7 +587,7 @@ constexpr type_t mulc(type_t& value1, type_t value2, type_t carry) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void div(type_t& value1, type_t value2) noexcept
 {
     value1 /= value2;
@@ -524,7 +596,7 @@ constexpr void div(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t divr(type_t& value1, type_t value2) noexcept
 {
     const type_t dividend = value1;
@@ -537,7 +609,7 @@ constexpr type_t divr(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {
@@ -594,7 +666,7 @@ constexpr void div2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {
@@ -656,7 +728,7 @@ constexpr type_t divr2(type_t value1_hi, type_t& value1_lo, type_t value2) noexc
 #pragma warning(push)
 #pragma warning(disable : 4724)
 
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void mod(type_t& value1, type_t value2) noexcept
 {
     value1 %= value2;
@@ -667,7 +739,7 @@ constexpr void mod(type_t& value1, type_t value2) noexcept
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-template<unsigned_type type_t>
+template<unsigned_native_type type_t>
 constexpr void mod2(type_t value1_hi, type_t& value1_lo, type_t value2) noexcept
 {
     if (value2 != 0 && value1_hi >= value2) {

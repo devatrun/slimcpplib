@@ -220,6 +220,7 @@ constexpr long_uint_t<native_t, size>::long_uint_t(value_t value) noexcept
         digits[n] = value & ~native_t(0);
         value >>= std::min(bit_count_v<value_t> -1, bit_count_v<native_t>);
     }
+
     for (uint_t n = value_size; n < std::size(digits); ++n)
         digits[n] = native_t(0);
 }
@@ -236,6 +237,7 @@ constexpr long_uint_t<native_t, size>::long_uint_t(value_t value) noexcept
         digits[n] = value & ~native_t(0);
         value >>= std::min(bit_count_v<value_t> - 1, bit_count_v<native_t>);
     }
+
     for (uint_t n = value_size; n < std::size(digits); ++n)
         digits[n] = extension;
 }
@@ -304,13 +306,7 @@ constexpr long_uint_t<native_t, size>::operator value_t() const noexcept
 template<typename native_t, uint_t size>
 constexpr bool long_uint_t<native_t, size>::operator==(const long_uint_t& that) const noexcept
 {
-    for (uint_t n = std::size(digits); n-- > 0;) {
-
-        if (digits[n] != that.digits[n])
-            return false;
-    }
-
-    return true;
+    return array::cmp_equal(std::span(digits), std::span(that.digits));
 }
 
 
@@ -329,12 +325,12 @@ constexpr bool long_uint_t<native_t, size>::operator==(type_t value) const noexc
             extension = native_t(~native_t(0));
     }
 
-    if (digits[0] != native_t(value))
+    if (!cmp_equal(digits[0], native_t(value)))
         return false;
 
     for (uint_t n = 1; n < std::size(digits); ++n) {
 
-        if (digits[n] != extension)
+        if (!cmp_equal(digits[n], extension))
             return false;
     }
 
@@ -367,16 +363,7 @@ constexpr bool long_uint_t<native_t, size>::operator!=(type_t value) const noexc
 template<typename native_t, uint_t size>
 constexpr bool long_uint_t<native_t, size>::operator<(const long_uint_t& that) const noexcept
 {
-    native_t digit = digits[0];
-    bool borrow = sub(digit, that.digits[0]);
-
-    for (uint_t n = 1; n < std::size(digits); ++n) {
-
-        digit = digits[n];
-        borrow = subb(digit, that.digits[n], borrow);
-    }
-
-    return borrow;
+    return array::cmp_less(std::span(digits), std::span(that.digits));
 }
 
 
@@ -424,11 +411,11 @@ constexpr bool long_uint_t<native_t, size>::operator<(value_t value) const noexc
 
     for (uint_t n = std::size(digits); n-- > 1;) {
 
-        if (digits[n] != extension)
-            return digits[n] < extension;
+        if (!cmp_equal(digits[n], extension))
+            return cmp_less(digits[n], extension);
     }
 
-    return digits[0] < native_t(value);
+    return cmp_less(digits[0], native_t(value));
 }
 
 
@@ -472,8 +459,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() c
 {
     long_uint_t tmp;
 
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        tmp.digits[n] = ~digits[n];
+    array::bit_not(std::span(tmp.digits), std::span(digits));
 
     return tmp;
 }
@@ -484,8 +470,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator~() c
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator&=(const long_uint_t& that) noexcept
 {
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] &= that.digits[n];
+    array::bit_and(std::span(digits), std::span(that.digits));
 
     return *this;
 }
@@ -506,10 +491,10 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator&=(t
             extension = native_t(~native_t(0));
     }
 
-    digits[0] &= native_t(value);
+    bit_and(digits[0], native_t(value));
 
     for (uint_t n = 1; n < std::size(digits); ++n)
-        digits[n] &= extension;
+        bit_and(digits[n], extension);
 
     return *this;
 }
@@ -548,8 +533,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator&(typ
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator|=(const long_uint_t& that) noexcept
 {
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] |= that.digits[n];
+    array::bit_or(std::span(digits), std::span(that.digits));
 
     return *this;
 }
@@ -570,10 +554,10 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator|=(t
             extension = native_t(~native_t(0));
     }
 
-    digits[0] |= native_t(value);
+    bit_or(digits[0], native_t(value));
 
     for (uint_t n = 1; n < std::size(digits); ++n)
-        digits[n] |= extension;
+        bit_or(digits[n], extension);
 
     return *this;
 }
@@ -585,6 +569,7 @@ template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator|(const long_uint_t& that) const noexcept
 {
     long_uint_t tmp = *this;
+
     tmp |= that;
 
     return tmp;
@@ -611,8 +596,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator|(typ
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator^=(const long_uint_t& that) noexcept
 {
-    for (uint_t n = 0; n < std::size(digits); ++n)
-        digits[n] ^= that.digits[n];
+    array::bit_xor(std::span(digits), std::span(that.digits));
 
     return *this;
 }
@@ -661,10 +645,10 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator^=(t
             extension = native_t(~native_t(0));
     }
 
-    digits[0] ^= native_t(value);
+    bit_xor(digits[0], native_t(value));
 
     for (uint_t n = 1; n < std::size(digits); ++n)
-        digits[n] ^= extension;
+        bit_xor(digits[n], extension);
 
     return *this;
 }
@@ -675,25 +659,7 @@ constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator^=(t
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator<<=(uint_t shift) noexcept
 {
-    if (shift < bit_count_v<native_t> * std::size(digits)) {
-
-        const uint_t offset = shift / bit_count_v<native_t>;
-        shift %= bit_count_v<native_t>;
-
-        for (uint_t n = std::size(digits); n-- > 1;)
-            digits[n] = shl2(digits[n], digits[n - 1], shift);
-
-        digits[0] <<= shift;
-
-        if (offset > 0) {
-
-            for (uint_t n = offset; n < std::size(digits); ++n)
-                digits[std::size(digits) + offset - n - 1] = digits[std::size(digits) - n - 1];
-
-            for (uint_t n = 0; n < offset; ++n)
-                digits[n] = 0;
-        }
-    }
+    array::shl(std::span(digits), shift);
 
     return *this;
 }
@@ -705,6 +671,7 @@ template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator<<(uint_t shift) const noexcept
 {
     long_uint_t tmp = *this;
+
     tmp <<= shift;
 
     return tmp;
@@ -716,25 +683,7 @@ constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator<<(ui
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size>& long_uint_t<native_t, size>::operator>>=(uint_t shift) noexcept
 {
-    if (shift < bit_count_v<native_t> * std::size(digits)) {
-
-        const uint_t offset = shift / bit_count_v<native_t>;
-        shift %= bit_count_v<native_t>;
-
-        for (uint_t n = 0; n < std::size(digits) - 1; ++n)
-            digits[n] = shr2(digits[n + 1], digits[n], shift);
-
-        digits[std::size(digits) - 1] >>= shift;
-
-        if (offset > 0) {
-
-            for (uint_t n = 0; n < std::size(digits) - offset; ++n)
-                digits[n] = digits[n + offset];
-
-            for (uint_t n = std::size(digits) - offset; n < std::size(digits); ++n)
-                digits[n] = 0;
-        }
-    }
+    array::shr(std::span(digits), shift);
 
     return *this;
 }
@@ -746,6 +695,7 @@ template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator>>(uint_t shift) const noexcept
 {
     long_uint_t tmp = *this;
+
     tmp >>= shift;
 
     return tmp;
@@ -947,14 +897,8 @@ template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> long_uint_t<native_t, size>::operator-() const noexcept
 {
     long_uint_t tmp;
-    bool borrow = true;
 
-    for (uint_t n = 0; n < std::size(digits); ++n) {
-
-        native_t digit = digits[n];
-        borrow = subb<native_t>(digit, 0, borrow);
-        tmp.digits[n] = ~digit;
-    }
+    array::negate(std::span(tmp.digits), std::span(digits));
 
     return tmp;
 }
@@ -1145,7 +1089,9 @@ constexpr long_uint_t<native_t, size> operator^(value_t value1, const long_uint_
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> operator<<(long_uint_t<native_t, size> value, uint_t shift) noexcept
 {
-    return value <<= shift;
+    value <<= shift;
+
+    return value;
 }
 
 
@@ -1154,7 +1100,9 @@ constexpr long_uint_t<native_t, size> operator<<(long_uint_t<native_t, size> val
 template<typename native_t, uint_t size>
 constexpr long_uint_t<native_t, size> operator>>(long_uint_t<native_t, size> value, uint_t shift) noexcept
 {
-    return value >>= shift;
+    value >>= shift;
+
+    return value;
 }
 
 

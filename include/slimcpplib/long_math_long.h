@@ -359,6 +359,47 @@ constexpr bool sign(const long_int_t<type_t, size>& value) noexcept;
 
 template<typename type_t, uint_t size>
 constexpr uint_t nlz(const long_uint_t<type_t, size>& value) noexcept;
+template<typename type_t, uint_t size>
+constexpr bool half_hi_zero(const long_uint_t<type_t, size>& value) noexcept;
+
+// bit operations
+
+template<typename type_t, uint_t size>
+constexpr void bit_not(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr void bit_and(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr void bit_or(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr void bit_xor(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+
+// shift bits to the left
+
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> shl2(const long_uint_t<type_t, size>& value_hi, const long_uint_t<type_t, size>& value_lo, uint_t shift) noexcept;
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> shr2(const long_uint_t<type_t, size>& value_hi, const long_uint_t<type_t, size>& value_lo, uint_t shift) noexcept;
+
+// add with carry
+
+template<typename type_t, uint_t size>
+constexpr bool add(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr bool addc(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, bool carry) noexcept;
+
+// subtract with borrow
+
+template<typename type_t, uint_t size>
+constexpr bool sub(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr bool subb(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, bool borrow) noexcept;
+
+// compare values
+
+template<typename type_t, uint_t size>
+constexpr bool cmp_equal(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr bool cmp_less(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
 
 // multiply with carry
 
@@ -374,7 +415,13 @@ constexpr void div(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, 
 template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
 template<typename type_t, uint_t size>
+constexpr void div2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> divr2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept;
+template<typename type_t, uint_t size>
 constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept;
+template<typename type_t, uint_t size>
+constexpr void mod2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept;
 
 
 
@@ -519,6 +566,164 @@ constexpr uint_t nlz(const long_uint_t<type_t, size>& value) noexcept
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename type_t, uint_t size>
+constexpr bool half_hi_zero(const long_uint_t<type_t, size>& value) noexcept
+{
+    for (uint_t n = size / 2; n < size; ++n) {
+
+        if (value.digits[n] != 0)
+            return false;
+    }
+
+    return true;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void bit_not(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    array::bit_not(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void bit_and(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    array::bit_and(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void bit_or(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    array::bit_or(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void bit_xor(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    array::bit_xor(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> shl2(const long_uint_t<type_t, size>& value_hi, const long_uint_t<type_t, size>& value_lo, uint_t shift) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    if (shift == 0 || shift >= bit_count_v<long_uint_t> * 2)
+        return value_hi;
+
+    if (shift < bit_count_v<long_uint_t>) {
+        long_uint_t result = value_hi;
+        long_uint_t carry = value_lo;
+
+        array::shl(std::span(result.digits), shift);
+        array::shr(std::span(carry.digits), bit_count_v<long_uint_t> - shift);
+        bit_or(result, carry);
+
+        return result;
+    }
+
+    long_uint_t result = value_lo;
+    array::shl(std::span(result.digits), shift - bit_count_v<long_uint_t>);
+    return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> shr2(const long_uint_t<type_t, size>& value_hi, const long_uint_t<type_t, size>& value_lo, uint_t shift) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    if (shift == 0 || shift >= bit_count_v<long_uint_t> * 2)
+        return value_lo;
+
+    if (shift < bit_count_v<long_uint_t>) {
+        long_uint_t result = value_lo;
+        long_uint_t carry = value_hi;
+
+        array::shr(std::span(result.digits), shift);
+        array::shl(std::span(carry.digits), bit_count_v<long_uint_t> - shift);
+        bit_or(result, carry);
+
+        return result;
+    }
+
+    long_uint_t result = value_hi;
+    array::shr(std::span(result.digits), shift - bit_count_v<long_uint_t>);
+    return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool add(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    return array::add(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool addc(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, bool carry) noexcept
+{
+    return array::addc(std::span(value1.digits), std::span(value2.digits), carry);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool sub(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    return array::sub(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool subb(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2, bool borrow) noexcept
+{
+    return array::subb(std::span(value1.digits), std::span(value2.digits), borrow);
+}
+
+
+
+template<typename type_t, uint_t size>
+constexpr bool cmp_equal(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    return array::cmp_equal(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr bool cmp_less(const long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
+{
+    return array::cmp_less(std::span(value1.digits), std::span(value2.digits));
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
 constexpr long_uint_t<type_t, size> mul(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, size>& value2) noexcept
 {
     using long_uint_t = long_uint_t<type_t, size>;
@@ -541,15 +746,255 @@ constexpr long_uint_t<type_t, size> mulc(long_uint_t<type_t, size>& value1, cons
     long_uint_t carry_hi;
     array::mul(std::span(value1.digits), std::span(value2.digits), std::span(carry_hi.digits));
 
-    bool add_carry = false;
+    const bool add_carry = array::add(std::span(value1.digits), std::span(carry.digits));
 
-    for (uint_t n = 0; n < size; ++n)
-        add_carry = addc(value1.digits[n], carry.digits[n], add_carry);
+    bool carry_digit = add_carry;
 
-    for (uint_t n = 0; add_carry && n < size; ++n)
-        add_carry = add(carry_hi.digits[n], type_t(1));
+    for (uint_t n = 0; carry_digit && n < size; ++n)
+        carry_digit = add(carry_hi.digits[n], type_t(1));
 
     return carry_hi;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void div2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    if (value2 != 0 && value1_hi >= value2) {
+
+        value1_lo = ~long_uint_t(0);
+        return;
+    }
+
+    const uint_t shift = nlz(value2);
+    long_uint_t svalue2 = value2;
+    array::shl(std::span(svalue2.digits), shift);
+
+    const long_uint_t nvalue2_hi = half_hi(svalue2);
+    const long_uint_t nvalue2_lo = half_lo(svalue2);
+
+    const long_uint_t nvalue1_32 = shl2(value1_hi, value1_lo, shift);
+    long_uint_t nvalue1_10 = value1_lo;
+    array::shl(std::span(nvalue1_10.digits), shift);
+
+    const long_uint_t nvalue1_hi = half_hi(nvalue1_10);
+    const long_uint_t nvalue1_lo = half_lo(nvalue1_10);
+
+    long_uint_t quotient_hi = nvalue1_32;
+    const long_uint_t remainder_hi = divr(quotient_hi, nvalue2_hi);
+
+    long_uint_t t1 = quotient_hi;
+    mul(t1, nvalue2_lo);
+    long_uint_t t2 = half_make_hi(remainder_hi);
+    bit_or(t2, nvalue1_hi);
+
+    if (cmp_less(t2, t1)) {
+
+        --quotient_hi;
+
+        long_uint_t delta = t1;
+        sub(delta, t2);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_hi;
+    }
+
+    long_uint_t nvalue1_21 = half_make_hi(nvalue1_32);
+    add(nvalue1_21, nvalue1_hi);
+    long_uint_t product_hi = quotient_hi;
+    mul(product_hi, svalue2);
+    sub(nvalue1_21, product_hi);
+
+    long_uint_t quotient_lo = nvalue1_21;
+    const long_uint_t remainder_lo = divr(quotient_lo, nvalue2_hi);
+
+    long_uint_t t3 = quotient_lo;
+    mul(t3, nvalue2_lo);
+    long_uint_t t4 = half_make_hi(remainder_lo);
+    bit_or(t4, nvalue1_lo);
+
+    if (cmp_less(t4, t3)) {
+
+        --quotient_lo;
+
+        long_uint_t delta = t3;
+        sub(delta, t4);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_lo;
+    }
+
+    value1_lo = half_make_hi(quotient_hi);
+    bit_or(value1_lo, quotient_lo);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr long_uint_t<type_t, size> divr2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    if (value2 != 0 && value1_hi >= value2) {
+
+        value1_lo = ~long_uint_t(0);
+        return value1_lo;
+    }
+
+    const uint_t shift = nlz(value2);
+    long_uint_t svalue2 = value2;
+    array::shl(std::span(svalue2.digits), shift);
+
+    const long_uint_t nvalue2_hi = half_hi(svalue2);
+    const long_uint_t nvalue2_lo = half_lo(svalue2);
+
+    const long_uint_t nvalue1_32 = shl2(value1_hi, value1_lo, shift);
+    long_uint_t nvalue1_10 = value1_lo;
+    array::shl(std::span(nvalue1_10.digits), shift);
+
+    const long_uint_t nvalue1_hi = half_hi(nvalue1_10);
+    const long_uint_t nvalue1_lo = half_lo(nvalue1_10);
+
+    long_uint_t quotient_hi = nvalue1_32;
+    const long_uint_t remainder_hi = divr(quotient_hi, nvalue2_hi);
+
+    long_uint_t t1 = quotient_hi;
+    mul(t1, nvalue2_lo);
+    long_uint_t t2 = half_make_hi(remainder_hi);
+    bit_or(t2, nvalue1_hi);
+
+    if (cmp_less(t2, t1)) {
+
+        --quotient_hi;
+
+        long_uint_t delta = t1;
+        sub(delta, t2);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_hi;
+    }
+
+    long_uint_t nvalue1_21 = half_make_hi(nvalue1_32);
+    add(nvalue1_21, nvalue1_hi);
+    long_uint_t product_hi = quotient_hi;
+    mul(product_hi, svalue2);
+    sub(nvalue1_21, product_hi);
+
+    long_uint_t quotient_lo = nvalue1_21;
+    const long_uint_t remainder_lo = divr(quotient_lo, nvalue2_hi);
+
+    long_uint_t t3 = quotient_lo;
+    mul(t3, nvalue2_lo);
+    long_uint_t t4 = half_make_hi(remainder_lo);
+    bit_or(t4, nvalue1_lo);
+
+    if (cmp_less(t4, t3)) {
+
+        --quotient_lo;
+
+        long_uint_t delta = t3;
+        sub(delta, t4);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_lo;
+    }
+
+    value1_lo = half_make_hi(quotient_hi);
+    bit_or(value1_lo, quotient_lo);
+
+    long_uint_t result = half_make_hi(nvalue1_21);
+    add(result, nvalue1_lo);
+    long_uint_t product_lo = quotient_lo;
+    mul(product_lo, svalue2);
+    sub(result, product_lo);
+    array::shr(std::span(result.digits), shift);
+    return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+template<typename type_t, uint_t size>
+constexpr void mod2(long_uint_t<type_t, size> value1_hi, long_uint_t<type_t, size>& value1_lo, long_uint_t<type_t, size> value2) noexcept
+{
+    using long_uint_t = long_uint_t<type_t, size>;
+
+    if (value2 != 0 && value1_hi >= value2) {
+
+        value1_lo = ~long_uint_t(0);
+        return;
+    }
+
+    const uint_t shift = nlz(value2);
+    long_uint_t svalue2 = value2;
+    array::shl(std::span(svalue2.digits), shift);
+
+    const long_uint_t nvalue2_hi = half_hi(svalue2);
+    const long_uint_t nvalue2_lo = half_lo(svalue2);
+
+    const long_uint_t nvalue1_32 = shl2(value1_hi, value1_lo, shift);
+    long_uint_t nvalue1_10 = value1_lo;
+    array::shl(std::span(nvalue1_10.digits), shift);
+
+    const long_uint_t nvalue1_hi = half_hi(nvalue1_10);
+    const long_uint_t nvalue1_lo = half_lo(nvalue1_10);
+
+    long_uint_t quotient_hi = nvalue1_32;
+    const long_uint_t remainder_hi = divr(quotient_hi, nvalue2_hi);
+
+    long_uint_t t1 = quotient_hi;
+    mul(t1, nvalue2_lo);
+    long_uint_t t2 = half_make_hi(remainder_hi);
+    bit_or(t2, nvalue1_hi);
+
+    if (cmp_less(t2, t1)) {
+
+        --quotient_hi;
+
+        long_uint_t delta = t1;
+        sub(delta, t2);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_hi;
+    }
+
+    long_uint_t nvalue1_21 = half_make_hi(nvalue1_32);
+    add(nvalue1_21, nvalue1_hi);
+    long_uint_t product_hi = quotient_hi;
+    mul(product_hi, svalue2);
+    sub(nvalue1_21, product_hi);
+
+    long_uint_t quotient_lo = nvalue1_21;
+    const long_uint_t remainder_lo = divr(quotient_lo, nvalue2_hi);
+
+    long_uint_t t3 = quotient_lo;
+    mul(t3, nvalue2_lo);
+    long_uint_t t4 = half_make_hi(remainder_lo);
+    bit_or(t4, nvalue1_lo);
+
+    if (cmp_less(t4, t3)) {
+
+        --quotient_lo;
+
+        long_uint_t delta = t3;
+        sub(delta, t4);
+
+        if (cmp_less(svalue2, delta))
+            --quotient_lo;
+    }
+
+    long_uint_t result = half_make_hi(nvalue1_21);
+    add(result, nvalue1_lo);
+    long_uint_t product_lo = quotient_lo;
+    mul(product_lo, svalue2);
+    sub(result, product_lo);
+    array::shr(std::span(result.digits), shift);
+    value1_lo = result;
 }
 
 
@@ -561,47 +1006,36 @@ constexpr void div(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, 
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
 
-    const half_uint_t dividend_lo = half_lo(value1);
-    const half_uint_t dividend_hi = half_hi(value1);
-    const half_uint_t divider_lo = half_lo(value2);
-    const half_uint_t divider_hi = half_hi(value2);
-
-    long_uint_t quotient;
-
-    if (divider_hi == 0) {
-
-        half_uint_t quotient_lo;
-        half_uint_t quotient_hi;
-
-        if (divider_lo > dividend_hi) {
-
-            if (dividend_hi == 0) {
-                quotient_lo = dividend_lo;
-                div(quotient_lo, divider_lo);
-            } else {
-                quotient_lo = dividend_lo;
-                div2<half_uint_t>(dividend_hi, quotient_lo, divider_lo);
-            }
-
-            quotient_hi = 0;
-
-        } else {
-
-            quotient_lo = dividend_lo;
-            div2<half_uint_t>(dividend_hi % divider_lo, quotient_lo, divider_lo);
-
-            quotient_hi = dividend_hi;
-            div(quotient_hi, divider_lo);
-        }
-
-        quotient = half_make(quotient_hi, quotient_lo);
-
-    } else {
-        quotient = value1;
-        div2<long_uint_t>(0, quotient, value2);
+    if (!half_hi_zero(value2)) {
+        div2(long_uint_t(0), value1, value2);
+        return;
     }
 
-    value1 = quotient;
+    const half_uint_t dividend_hi = half_hi(value1);
+    const half_uint_t divider_lo = half_lo(value2);
+    half_uint_t quotient_lo = half_lo(value1);
+    half_uint_t quotient_hi;
+
+    if (divider_lo > dividend_hi) {
+
+        if (dividend_hi == 0) {
+            div(quotient_lo, divider_lo);
+        } else {
+            div2(dividend_hi, quotient_lo, divider_lo);
+        }
+
+        quotient_hi = 0;
+
+    } else {
+        half_uint_t remainder_hi = dividend_hi;
+        mod(remainder_hi, divider_lo);
+        div2(remainder_hi, quotient_lo, divider_lo);
+
+        quotient_hi = dividend_hi;
+        div(quotient_hi, divider_lo);
+    }
+
+    value1 = half_make(quotient_hi, quotient_lo);
 }
 
 
@@ -617,51 +1051,36 @@ constexpr long_uint_t<type_t, size> divr(long_uint_t<type_t, size>& value1, cons
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
 
-    const half_uint_t dividend_lo = half_lo(value1);
+    if (!half_hi_zero(value2))
+        return divr2(long_uint_t(0), value1, value2);
+
     const half_uint_t dividend_hi = half_hi(value1);
     const half_uint_t divider_lo = half_lo(value2);
-    const half_uint_t divider_hi = half_hi(value2);
+    half_uint_t quotient_lo = half_lo(value1);
+    half_uint_t quotient_hi;
+    half_uint_t remainder_lo;
 
-    long_uint_t quotient;
+    if (divider_lo > dividend_hi) {
 
-    if (divider_hi == 0) {
-
-        half_uint_t quotient_lo;
-        half_uint_t quotient_hi;
-        half_uint_t remainder_lo;
-
-        if (divider_lo > dividend_hi) {
-
-            if (dividend_hi == 0) {
-                quotient_lo = dividend_lo;
-                remainder_lo = divr(quotient_lo, divider_lo);
-            } else {
-                quotient_lo = dividend_lo;
-                remainder_lo = divr2<half_uint_t>(dividend_hi, quotient_lo, divider_lo);
-            }
-
-            quotient_hi = 0;
-
+        if (dividend_hi == 0) {
+            remainder_lo = divr(quotient_lo, divider_lo);
         } else {
-            quotient_lo = dividend_lo;
-            remainder_lo = divr2<half_uint_t>(dividend_hi % divider_lo, quotient_lo, divider_lo);
-
-            quotient_hi = dividend_hi;
-            div(quotient_hi, divider_lo);
+            remainder_lo = divr2(dividend_hi, quotient_lo, divider_lo);
         }
 
-        quotient = half_make(quotient_hi, quotient_lo);
-        value1 = quotient;
-
-        return half_make(half_uint_t(0), remainder_lo);
+        quotient_hi = 0;
 
     } else {
-        quotient = value1;
-        const long_uint_t remainder = divr2<long_uint_t>(0, quotient, value2);
-        value1 = quotient;
+        half_uint_t remainder_hi = dividend_hi;
+        mod(remainder_hi, divider_lo);
+        remainder_lo = divr2(remainder_hi, quotient_lo, divider_lo);
 
-        return remainder;
+        quotient_hi = dividend_hi;
+        div(quotient_hi, divider_lo);
     }
+
+    value1 = half_make(quotient_hi, quotient_lo);
+    return half_make(half_uint_t(0), remainder_lo);
 }
 
 #pragma warning(pop)
@@ -675,37 +1094,30 @@ constexpr void mod(long_uint_t<type_t, size>& value1, const long_uint_t<type_t, 
     using long_uint_t = long_uint_t<type_t, size>;
     using half_uint_t = half_t<long_uint_t>;
 
-    const half_uint_t dividend_lo = half_lo(value1);
+    if (!half_hi_zero(value2)) {
+        mod2(long_uint_t(0), value1, value2);
+        return;
+    }
+
     const half_uint_t dividend_hi = half_hi(value1);
     const half_uint_t divider_lo = half_lo(value2);
-    const half_uint_t divider_hi = half_hi(value2);
+    half_uint_t remainder_lo = half_lo(value1);
 
-    if (divider_hi == 0) {
+    if (divider_lo > dividend_hi) {
 
-        half_uint_t remainder_lo;
+        if (dividend_hi == 0)
+            mod(remainder_lo, divider_lo);
+        else
+            mod2(dividend_hi, remainder_lo, divider_lo);
 
-        if (divider_lo > dividend_hi) {
+    } else {
 
-            remainder_lo = dividend_lo;
+        half_uint_t remainder_hi = dividend_hi;
+        mod(remainder_hi, divider_lo);
+        mod2(remainder_hi, remainder_lo, divider_lo);
+    }
 
-            if (dividend_hi == 0)
-                mod(remainder_lo, divider_lo);
-            else
-                mod2<half_uint_t>(dividend_hi, remainder_lo, divider_lo);
-
-        } else {
-
-            half_uint_t remainder_hi = dividend_hi;
-            mod(remainder_hi, divider_lo);
-
-            remainder_lo = dividend_lo;
-            mod2<half_uint_t>(remainder_hi, remainder_lo, divider_lo);
-        }
-
-        value1 = half_make(half_uint_t(0), remainder_lo);
-
-    } else
-        mod2<long_uint_t>(0, value1, value2);
+    value1 = half_make(half_uint_t(0), remainder_lo);
 }
 
 

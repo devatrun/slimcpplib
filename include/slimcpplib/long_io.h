@@ -452,7 +452,7 @@ inline std::optional<long_uint_t> read_unsigned_integer(std::basic_istream<char_
     }
 
     if (negative)
-        value = -value;
+        array::negate(std::span(value.digits), std::span<const native_t, std::tuple_size_v<typename long_uint_t::native_array_t>>(value.digits));
 
     return value;
 }

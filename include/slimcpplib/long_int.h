@@ -542,9 +542,9 @@ constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator--(int)
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size> long_int_t<native_t, size>::operator-() const noexcept
 {
-    long_int_t tmp = *this;
+    long_int_t tmp;
 
-    array::negate(std::span(tmp.digits));
+    array::negate(std::span(tmp.digits), std::span(digits));
 
     return tmp;
 }
@@ -583,17 +583,17 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator/=(con
     const bool divider_sign = that.sign();
 
     if (value_sign)
-        array::negate(std::span(digits));
+        array::negate(std::span(digits), std::span<const native_t, size>(digits));
 
     long_uint_t<native_t, size> divider = that;
 
     if (divider_sign)
-        array::negate(std::span(divider.digits));
+        array::negate(std::span(divider.digits), std::span<const native_t, size>(divider.digits));
 
     long_uint_t<native_t, size>::operator/=(divider);
 
     if (value_sign != divider_sign)
-        array::negate(std::span(digits));
+        array::negate(std::span(digits), std::span<const native_t, size>(digits));
 
     return *this;
 }
@@ -621,17 +621,17 @@ constexpr long_int_t<native_t, size>& long_int_t<native_t, size>::operator%=(con
     const bool divider_sign = that.sign();
 
     if (value_sign)
-        array::negate(std::span(digits));
+        array::negate(std::span(digits), std::span<const native_t, size>(digits));
 
     long_uint_t<native_t, size> divider = that;
 
     if (divider_sign)
-        array::negate(std::span(divider.digits));
+        array::negate(std::span(divider.digits), std::span<const native_t, size>(divider.digits));
 
     long_uint_t<native_t, size>::operator%=(divider);
 
     if (value_sign)
-        array::negate(std::span(digits));
+        array::negate(std::span(digits), std::span<const native_t, size>(digits));
 
     return *this;
 }
@@ -712,7 +712,9 @@ constexpr bool operator>=(value_t value1, const long_int_t<native_t, size>& valu
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size> operator<<(long_int_t<native_t, size> value, uint_t shift) noexcept
 {
-    return value <<= shift;
+    value <<= shift;
+
+    return value;
 }
 
 
@@ -721,7 +723,9 @@ constexpr long_int_t<native_t, size> operator<<(long_int_t<native_t, size> value
 template<typename native_t, uint_t size>
 constexpr long_int_t<native_t, size> operator>>(long_int_t<native_t, size> value, uint_t shift) noexcept
 {
-    return value >>= shift;
+    value >>= shift;
+
+    return value;
 }
 
 
